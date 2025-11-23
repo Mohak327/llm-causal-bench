@@ -1,6 +1,6 @@
-import Home from "../sections/Home/Home.controller";
-import Skills from "../sections/Skills/Skills.controller";
-import ProjectDetail from "../sections/ProjectDetail/ProjectDetail.controller";
+import Home from "../pages/Home/Home.controller";
+import Skills from "../pages/Skills/Skills.controller";
+import ProjectDetail from "../pages/ProjectDetail/ProjectDetail.controller";
 
 interface RouteInterface {
     path: string;

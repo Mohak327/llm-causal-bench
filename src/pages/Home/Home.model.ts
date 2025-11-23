@@ -1,3 +1,5 @@
+import { Theme } from "../../Theme";
+
 export const homeData = {
   marquee: "MOHAK SHARMA • COLUMBIA UNIVERSITY • NEUROSCIENCE • HEALTHTECH • FULL STACK",
   hero: {
@@ -40,7 +42,8 @@ export const homeData = {
           "Probed embeddings from 200K+ protein structures (AlphaFold DB) across 48 transformer layers.",
           "Uncovered principles of biological representation for drug discovery."
         ],
-        accent: "purple"
+        accent: Theme.colors.purple[400],
+        bgColor: Theme.colors.white,
       },
       {
         role: "Full Stack Engineer",
@@ -52,7 +55,8 @@ export const homeData = {
           "Optimized Web Vitals by 800% via SEO refactoring.",
           "Migrated JS codebase to TypeScript using AI tools."
         ],
-        accent: "yellow"
+        accent: Theme.colors.yellow[400],
+        bgColor: Theme.colors.white,
       },
       {
         role: "Frontend Web Developer",
@@ -62,7 +66,8 @@ export const homeData = {
           "Built React admin panel accelerating output by 40% for 250+ teammates.",
           "Implemented micro-frontend architecture, cutting build sizes by 35%."
         ],
-        accent: "yellow"
+        accent: Theme.colors.yellow[400],
+        bgColor: Theme.colors.white,
       }
     ]
   },
@@ -74,14 +79,16 @@ export const homeData = {
         title: "Causal & Time Series Analysis of Neural Activity",
         description: "Using Hodgkin-Huxley & Rinzel models to investigate synaptic activity.",
         tags: ["Python", "Simulations"],
-        accent: "pink"
+        accent: Theme.colors.pink[400],
+        bgColor: Theme.colors.pink[400],
       },
       {
         category: "HealthTech / Biophysics",
         title: "Computational Cardiac Modeling",
         description: "ECG signal modeling and Phase Response Curve (PRC) analysis using nonlinear ODE simulations.",
         tags: ["Biophysics", "Nonlinear ODE"],
-        accent: "green"
+        accent: Theme.colors.green[400],
+        bgColor: Theme.colors.green[400],
       }
     ]
   },
@@ -93,14 +100,13 @@ export const homeData = {
         year: "2026",
         degree: "M.S. Computer Science",
         courses: "Coursework: Machine Learning, Causal Inference, Computational Neuroscience, Quantum Computing.",
-        style: "bg-[#f0fdf4]"
+        bgColor: Theme.colors.blue[100],
       },
       {
         university: "GGSIPU",
         year: "2023",
         degree: "B.Tech Computer Science",
         courses: "Coursework: Advanced Math, Physics, OOPS, Data Structures, Networks, OS, DBMS, Engineering Mechanics, Circuits & Systems, Computer Organisation & Architecture, Theory of Computation, Agile Methodologies, Switching Theory & Logical Design.",
-        style: ""
       }
     ]
   },
