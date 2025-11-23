@@ -1,12 +1,13 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
-import { Point } from '../../services/physics/Point/Point.controller';
+import { PhysicsService } from '../../services/physics/Physics.service';
+import type { IPhysicsSimulation } from '../../services/physics/Physics.interface';
 import * as CONFIG from './EnergyField.config';
 import EnergyFieldView from './EnergyField.view';
 
 const EnergyFieldController: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const pointsRef = useRef<Point[]>([]);
+  const pointsRef = useRef<IPhysicsSimulation[]>([]);
   const mouseRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const energyRef = useRef(0);
   const timeRef = useRef(0);
@@ -37,7 +38,7 @@ const EnergyFieldController: React.FC = () => {
 
       for (let x = 0; x <= width; x += CONFIG.GRID_SPACING) {
         for (let y = 0; y <= height; y += CONFIG.GRID_SPACING) {
-          pointsRef.current.push(new Point(x, y, energyFieldConfig));
+          pointsRef.current.push(PhysicsService.createSimulation('point', { x, y, pointConfig: energyFieldConfig }));
         }
       }
     };

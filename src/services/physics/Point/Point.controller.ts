@@ -1,6 +1,7 @@
 import type { PointConfig } from "./Point.interface";
+import type { IPhysicsSimulation } from "../Physics.interface";
 
-export class Point {
+export class Point implements IPhysicsSimulation {
   x: number;
   y: number;
   originX: number;
@@ -58,7 +59,7 @@ export class Point {
 
     if (energy > 0.01 && speed > 0.1) {
       const hue = (this.originX + this.originY) % 360;
-      context.fillStyle = `hsla(${hue}, 90%, 70%, ${alpha * 2})`;
+      context.fillStyle = `hsla(${hue}, 70%, 70%, ${alpha * 5})`;
     } else {
       context.fillStyle = `rgba(0, 0, 0, ${alpha})`;
     }
