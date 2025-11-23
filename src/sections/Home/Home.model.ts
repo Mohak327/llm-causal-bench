@@ -13,8 +13,8 @@ export const homeData = {
   status: {
     title: "Current Status",
     lines: [
-      { text: "M.S. CS @ Columbia University", color: "text-[#4ade80]" },
-      { text: "Researcher @ CRIS Lab", color: "text-[#a78bfa]" }
+      { text: "M.S. CS @ Columbia University", color: "text-green-400" },
+      { text: "Researcher @ CRIS Lab", color: "text-purple-400" }
     ]
   },
   meta: [
@@ -40,7 +40,7 @@ export const homeData = {
           "Probed embeddings from 200K+ protein structures (AlphaFold DB) across 48 transformer layers.",
           "Uncovered principles of biological representation for drug discovery."
         ],
-        accent: "accentPurple"
+        accent: "purple"
       },
       {
         role: "Full Stack Engineer",
@@ -52,7 +52,7 @@ export const homeData = {
           "Optimized Web Vitals by 800% via SEO refactoring.",
           "Migrated JS codebase to TypeScript using AI tools."
         ],
-        accent: "accentYellow"
+        accent: "yellow"
       },
       {
         role: "Frontend Web Developer",
@@ -62,7 +62,7 @@ export const homeData = {
           "Built React admin panel accelerating output by 40% for 250+ teammates.",
           "Implemented micro-frontend architecture, cutting build sizes by 35%."
         ],
-        accent: "accentYellow"
+        accent: "yellow"
       }
     ]
   },
@@ -74,14 +74,14 @@ export const homeData = {
         title: "Causal & Time Series Analysis of Neural Activity",
         description: "Using Hodgkin-Huxley & Rinzel models to investigate synaptic activity.",
         tags: ["Python", "Simulations"],
-        accent: "accentPink"
+        accent: "pink"
       },
       {
         category: "HealthTech / Biophysics",
         title: "Computational Cardiac Modeling",
         description: "ECG signal modeling and Phase Response Curve (PRC) analysis using nonlinear ODE simulations.",
         tags: ["Biophysics", "Nonlinear ODE"],
-        accent: "accentGreen"
+        accent: "green"
       }
     ]
   },
@@ -135,8 +135,8 @@ export const homeData = {
     contact: {
       title: "Let's Build The Future.",
       links: [
-        { text: "ms7306@columbia.edu", href: "mailto:ms7306@columbia.edu", hoverClass: "hover:bg-[#ff90e8]" },
-        { text: "LinkedIn Profile", href: "https://www.linkedin.com/in/sharma-mohak/", hoverClass: "hover:bg-[#0077b5] hover:text-white" }
+        { text: "ms7306@columbia.edu", href: "mailto:ms7306@columbia.edu", hoverClass: "hover:px-1 hover:bg-[#ff90e8]" },
+        { text: "LinkedIn Profile", href: "https://www.linkedin.com/in/sharma-mohak/", hoverClass: "hover:px-1 hover:bg-[#0077b5] hover:text-white" }
       ]
     },
     copyright: "© 2025 Mohak Sharma."

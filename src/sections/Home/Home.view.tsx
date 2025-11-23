@@ -1,24 +1,12 @@
 import React from 'react';
 import { homeData } from './Home.model';
 import { Brain, Activity, Terminal, ExternalLink, Mail } from 'lucide-react';
-
-const THEME = {
-  bg: "bg-[#f0f0f0]",
-  text: "text-black",
-  border: "border-black",
-  shadow: "shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
-  hoverShadow: "hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]",
-  cardBg: "bg-white",
-  accentPink: "bg-[#ff90e8]",
-  accentGreen: "bg-[#4ade80]",
-  accentPurple: "bg-[#a78bfa]",
-  accentYellow: "bg-[#facc15]",
-};
+import { Theme } from '../../Theme';
 
 const HomeView = () => {
   return (
-    <div className={`min-h-screen ${THEME.text} font-mono selection:bg-black selection:text-white overflow-x-hidden`}>
-      <div className="fixed top-0 w-full z-50 border-b-4 border-black bg-[#facc15] overflow-hidden whitespace-nowrap py-2">
+    <div className={`min-h-screen text-black font-mono selection:bg-black selection:text-white overflow-x-hidden`}>
+      <div style={{ backgroundColor: Theme.colors.yellow[400] }} className={`fixed top-0 w-full z-50 border-b-4 border-black overflow-hidden whitespace-nowrap py-2`}>
         <div className="animate-marquee inline-block">
           <span className="mx-4 text-lg font-bold uppercase tracking-tighter">{homeData.marquee}</span>
           <span className="mx-4 text-lg font-bold uppercase tracking-tighter">{homeData.marquee}</span>
@@ -40,12 +28,12 @@ const HomeView = () => {
             </h1>
             <p className="text-xl lg:text-2xl font-bold mb-8 max-w-2xl">
               {homeData.hero.subtitle.prefix}{" "}
-              <span className="bg-[#ff90e8] px-1 border border-black">{homeData.hero.subtitle.highlight1}</span>{" "}
+              <span style={{ backgroundColor: Theme.colors.pink[400] }} className={`px-1 border border-black`}>{homeData.hero.subtitle.highlight1}</span>{" "}
               {homeData.hero.subtitle.and}{" "}
-              <span className="bg-[#a78bfa] px-1 border border-black">{homeData.hero.subtitle.highlight2}</span>.
+              <span style={{ backgroundColor: Theme.colors.purple[400] }} className={`px-1 border border-black`}>{homeData.hero.subtitle.highlight2}</span>.
             </p>
             <div className="flex flex-wrap gap-4">
-              <a href="mailto:ms7306@columbia.edu" className={`flex items-center gap-2 px-6 py-3 border-2 border-black font-bold uppercase bg-white transition-all ${THEME.shadow} ${THEME.hoverShadow}`}>
+              <a href="mailto:ms7306@columbia.edu" className={`flex items-center gap-2 px-6 py-3 border-2 border-black font-bold uppercase bg-white transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]`}>
                 <Mail size={20} /> {homeData.hero.contact}
               </a>
             </div>
@@ -73,7 +61,7 @@ const HomeView = () => {
         </header>
 
         <section className="mb-16 border-4 border-black bg-white p-8 relative">
-          <div className="absolute -top-4 left-8 bg-[#facc15] px-4 py-1 border-2 border-black font-bold uppercase transform -rotate-2">
+          <div style={{ backgroundColor: Theme.colors.yellow[400] }} className={`absolute -top-4 left-8 px-4 py-1 border-2 border-black font-bold uppercase transform -rotate-2`}>
             {homeData.techArsenal.title}
           </div>
           <div className="flex flex-wrap gap-3 mt-4">
@@ -92,8 +80,8 @@ const HomeView = () => {
               <h2 className="text-4xl font-black uppercase">{homeData.experience.title}</h2>
             </div>
             {homeData.experience.jobs.map((job, index) => (
-              <div key={index} className={`border-4 border-black bg-white p-6 relative group transition-all ${THEME.shadow}`}>
-                <div className={`absolute top-0 right-0 p-2 border-l-4 border-b-4 border-black ${THEME[job.accent as keyof typeof THEME]} font-bold`}>
+              <div key={index} className={`border-4 border-black bg-white p-6 relative group transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
+                <div style={{ backgroundColor: Theme.colors[job.accent as keyof typeof Theme.colors][400] }} className={`absolute top-0 right-0 p-2 border-l-4 border-b-4 border-black font-bold`}>
                   {job.duration}
                 </div>
                 <h3 className="text-2xl font-black uppercase mb-1 mt-6">{job.role}</h3>
@@ -113,7 +101,7 @@ const HomeView = () => {
               <h2 className="text-4xl font-black uppercase">{homeData.projects.title}</h2>
             </div>
             {homeData.projects.items.map((project, index) => (
-              <div key={index} className={`border-4 border-black ${THEME[project.accent as keyof typeof THEME]} p-6 relative transition-all ${THEME.shadow} ${THEME.hoverShadow}`}>
+              <div key={index} style={{ backgroundColor: Theme.colors[project.accent as keyof typeof Theme.colors][400] }} className={`border-4 border-black p-6 relative transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]`}>
                 <div className="bg-white border-2 border-black inline-block px-3 py-1 font-bold text-xs uppercase mb-4">
                   {project.category}
                 </div>
@@ -148,7 +136,7 @@ const HomeView = () => {
 
         <footer className="mt-20 border-t-4 border-black pt-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className={`col-span-2 border-4 border-black p-8 bg-white relative ${THEME.shadow}`}>
+            <div className={`col-span-2 border-4 border-black p-8 bg-white relative shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
               <div className="absolute -top-5 left-4 bg-black text-white px-4 py-1 font-bold uppercase rotate-1">
                 {homeData.footer.beyondTheCode.title}
               </div>

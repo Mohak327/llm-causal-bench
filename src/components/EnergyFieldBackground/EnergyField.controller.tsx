@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
-import { Point } from '../../physics/Point.controller';
+import { Point } from '../../services/physics/Point/Point.controller';
 import * as CONFIG from './EnergyField.config';
 import EnergyFieldView from './EnergyField.view';
 

@@ -1,17 +1,12 @@
 import React from "react";
 import {
   BrowserRouter as Router,
-  Routes,
-  Route,
   Link,
   useLocation,
 } from "react-router-dom";
-// import ProjectDetail from './ProjectDetail';
 import { ArrowLeft } from "lucide-react";
-import Home from "./sections/Home/Home.controller";
-import Skills from "./sections/Skills/Skills.controller";
-import ProjectDetail from "./sections/ProjectDetail/ProjectDetail.controller";
-import EnergyFieldController from "./components/EnergyFieldBackground/EnergyField.controller";
+import EnergyFieldController from "../components/EnergyFieldBackground/EnergyField.controller";
+import AppRoutes from "../routes/routes.view";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -30,7 +25,7 @@ const Layout = ({ children }: LayoutProps) => {
            <Link to="/" className="flex items-center gap-2 font-bold uppercase border-2 border-black bg-white px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
              <ArrowLeft size={16} /> Back to HQ
            </Link>
-           <span className="font-black uppercase text-lg tracking-tighter hidden md:block">Mohak Sharma / Systems</span>
+           <span className="font-black uppercase text-lg tracking-tighter hidden md:block">Mohak Sharma / Skills</span>
         </nav>
       )}
 
@@ -41,15 +36,12 @@ const Layout = ({ children }: LayoutProps) => {
   );
 };
 
+
 const App = () => {
   return (
     <Router>
       <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/skills" element={<Skills />} />
-          <Route path="/project/:id" element={<ProjectDetail />} />
-        </Routes>
+        <AppRoutes />
       </Layout>
     </Router>
   );

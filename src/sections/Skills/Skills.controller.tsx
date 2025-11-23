@@ -57,7 +57,7 @@ const Skills = () => {
       <div className="max-w-6xl mx-auto">
         <header className="mb-12 border-b-4 border-black pb-6">
           <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-4">
-            Skill<br/>Matrix
+            Skill Matrix
           </h1>
           <p className="text-xl font-bold max-w-2xl">
             The elemental composition of my technical capabilities. Organized by domain affinity.
