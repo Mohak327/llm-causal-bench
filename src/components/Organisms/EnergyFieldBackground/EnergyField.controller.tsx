@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
-import { PhysicsService } from '../../services/physics/Physics.service';
-import type { IPhysicsSimulation } from '../../services/physics/Physics.interface';
+import { PhysicsService } from '../../../services/physics/Physics.service';
+import type { IPhysicsSimulation } from '../../../services/physics/Physics.interface';
 import * as CONFIG from './EnergyField.config';
 import EnergyFieldView from './EnergyField.view';
 

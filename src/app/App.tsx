@@ -5,7 +5,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import EnergyFieldController from "../components/EnergyFieldBackground/EnergyField.controller";
+import EnergyFieldController from "../components/Organisms/EnergyFieldBackground/EnergyField.controller";
 import AppRoutes from "../routes/routes.view";
 
 interface LayoutProps {
