@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useRef } from 'react';
 import { PhysicsService } from '../../../services/physics/Physics.service';
 import type { IPhysicsSimulation } from '../../../services/physics/Physics.interface';
@@ -8,12 +7,15 @@ import EnergyFieldView from './EnergyField.view';
 const EnergyFieldController: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointsRef = useRef<IPhysicsSimulation[]>([]);
-  const mouseRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const mouseRef = useRef({ x: 0, y: 0 });
   const energyRef = useRef(0);
   const timeRef = useRef(0);
-  const lastScrollYRef = useRef(window.scrollY);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
+    mouseRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    lastScrollYRef.current = window.scrollY;
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');

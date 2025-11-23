@@ -1,34 +1,43 @@
 import { Theme } from "../../Theme";
 
 export const homeData = {
-  marquee: "MOHAK SHARMA • COLUMBIA UNIVERSITY • NEUROSCIENCE • HEALTHTECH • FULL STACK",
+  marquee:
+    "MOHAK SHARMA • COLUMBIA UNIVERSITY • NEUROSCIENCE • HEALTHTECH • FULL STACK",
   hero: {
     title: ["Mohak", "Sharma"],
     subtitle: {
       prefix: "Engineering the intersection of",
       highlight1: "Biological Systems",
       and: "and",
-      highlight2: "Computational Intelligence"
+      highlight2: "Computational Intelligence",
     },
-    contact: "Contact Me"
+    contact: "Contact Me",
   },
   status: {
     title: "Current Status",
     lines: [
       { text: "M.S. CS @ Columbia University", color: "text-green-400" },
-      { text: "Researcher @ CRIS Lab", color: "text-purple-400" }
-    ]
+      { text: "Researcher @ CRIS Lab", color: "text-purple-400" },
+    ],
   },
   meta: [
     { label: "Location", value: "New York, NY" },
-    { label: "Focus", value: "Healthcare, Environment, Finance" }
+    { label: "Focus", value: "Healthcare, Environment, Finance" },
   ],
   techArsenal: {
     title: "Technical Arsenal",
     skills: [
-      "Python", "C++", "React 19", "Next.js", "TypeScript", "GraphQL",
-      "AWS", "AlphaFold", "Pytorch", "MongoDB"
-    ]
+      "Python",
+      "C++",
+      "React 19",
+      "Next.js",
+      "TypeScript",
+      "GraphQL",
+      "AWS",
+      "AlphaFold",
+      "Pytorch",
+      "MongoDB",
+    ],
   },
   experience: {
     title: "Experience",
@@ -40,7 +49,7 @@ export const homeData = {
         tasks: [
           "Analyzed Predicted Aligned Error (PAE) for 400-dim protein matrices.",
           "Probed embeddings from 200K+ protein structures (AlphaFold DB) across 48 transformer layers.",
-          "Uncovered principles of biological representation for drug discovery."
+          "Uncovered principles of biological representation for drug discovery.",
         ],
         accent: Theme.colors.purple[400],
         bgColor: Theme.colors.white,
@@ -53,7 +62,7 @@ export const homeData = {
           "Overhauled architecture with Next.js & GraphQL, boosting performance by 35%.",
           "Developed a JIT compiler cutting execution time by 40%.",
           "Optimized Web Vitals by 800% via SEO refactoring.",
-          "Migrated JS codebase to TypeScript using AI tools."
+          "Migrated JS codebase to TypeScript using AI tools.",
         ],
         accent: Theme.colors.yellow[400],
         bgColor: Theme.colors.white,
@@ -64,33 +73,39 @@ export const homeData = {
         duration: "2022 - 2023",
         tasks: [
           "Built React admin panel accelerating output by 40% for 250+ teammates.",
-          "Implemented micro-frontend architecture, cutting build sizes by 35%."
+          "Implemented micro-frontend architecture, cutting build sizes by 35%.",
         ],
         accent: Theme.colors.yellow[400],
         bgColor: Theme.colors.white,
-      }
-    ]
+      },
+    ],
   },
   projects: {
     title: "Projects",
     items: [
       {
+        projectId: "neural",
+        link: "/projects/neural",
         category: "Neuroscience / Causal ML",
         title: "Causal & Time Series Analysis of Neural Activity",
-        description: "Using Hodgkin-Huxley & Rinzel models to investigate synaptic activity.",
+        description:
+          "Using Hodgkin-Huxley & Rinzel models to investigate synaptic activity.",
         tags: ["Python", "Simulations"],
         accent: Theme.colors.pink[400],
         bgColor: Theme.colors.pink[400],
       },
       {
+        projectId: "cardiac",
+        link: "/projects/cardiac",
         category: "HealthTech / Biophysics",
         title: "Computational Cardiac Modeling",
-        description: "ECG signal modeling and Phase Response Curve (PRC) analysis using nonlinear ODE simulations.",
+        description:
+          "ECG signal modeling and Phase Response Curve (PRC) analysis using nonlinear ODE simulations.",
         tags: ["Biophysics", "Nonlinear ODE"],
         accent: Theme.colors.green[400],
         bgColor: Theme.colors.green[400],
-      }
-    ]
+      },
+    ],
   },
   education: {
     title: "Education",
@@ -99,16 +114,18 @@ export const homeData = {
         university: "Columbia University",
         year: "2026",
         degree: "M.S. Computer Science",
-        courses: "Coursework: Machine Learning, Causal Inference, Computational Neuroscience, Quantum Computing.",
+        courses:
+          "Coursework: Machine Learning, Causal Inference, Computational Neuroscience, Quantum Computing.",
         bgColor: Theme.colors.blue[100],
       },
       {
         university: "GGSIPU",
         year: "2023",
         degree: "B.Tech Computer Science",
-        courses: "Coursework: Advanced Math, Physics, OOPS, Data Structures, Networks, OS, DBMS, Engineering Mechanics, Circuits & Systems, Computer Organisation & Architecture, Theory of Computation, Agile Methodologies, Switching Theory & Logical Design.",
-      }
-    ]
+        courses:
+          "Coursework: Advanced Math, Physics, OOPS, Data Structures, Networks, OS, DBMS, Engineering Mechanics, Circuits & Systems, Computer Organisation & Architecture, Theory of Computation, Agile Methodologies, Switching Theory & Logical Design.",
+      },
+    ],
   },
   footer: {
     beyondTheCode: {
@@ -120,8 +137,8 @@ export const homeData = {
           duration: "Oct 2025 - Present",
           points: [
             "Begun outreach & mentoring efforts impacting over 2,000 potential graduate candidates annually.",
-            "Serves as a primary resource during major admissions events guiding students toward informed enrollment decisions."
-          ]
+            "Serves as a primary resource during major admissions events guiding students toward informed enrollment decisions.",
+          ],
         },
         {
           title: "Student Volunteer (Rotary Intl. Dist. 3012, NSS, GGSIPU)",
@@ -133,18 +150,26 @@ export const homeData = {
             "Co-founded CodeFlux tech community scaled to 1000+ members; organized 8+ coding workshops.",
             "Co-Founded & Events Head (Cultural Committee BPIT); led 30+ technical & cultural events engaging 20,000+ students; secured $25,000 sponsorship.",
             "Redressal Committee Student Representative, responsible for over 2000 students on campus.",
-            "Led cancer awareness team for Project Power of Ponytails: 10+ mammography sessions & 30+ awareness events."
-          ]
-        }
-      ]
+            "Led cancer awareness team for Project Power of Ponytails: 10+ mammography sessions & 30+ awareness events.",
+          ],
+        },
+      ],
     },
     contact: {
       title: "Let's Build The Future.",
       links: [
-        { text: "ms7306@columbia.edu", href: "mailto:ms7306@columbia.edu", hoverClass: "hover:px-1 hover:bg-[#ff90e8]" },
-        { text: "LinkedIn Profile", href: "https://www.linkedin.com/in/sharma-mohak/", hoverClass: "hover:px-1 hover:bg-[#0077b5] hover:text-white" }
-      ]
+        {
+          text: "ms7306@columbia.edu",
+          href: "mailto:ms7306@columbia.edu",
+          hoverClass: "hover:px-1 hover:bg-[#ff90e8]",
+        },
+        {
+          text: "LinkedIn Profile",
+          href: "https://www.linkedin.com/in/sharma-mohak/",
+          hoverClass: "hover:px-1 hover:bg-[#0077b5] hover:text-white",
+        },
+      ],
     },
-    copyright: "© 2025 Mohak Sharma."
-  }
+    copyright: "© 2025 Mohak Sharma.",
+  },
 };
