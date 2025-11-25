@@ -24,9 +24,9 @@ const TitledTagCloud = ({ title, skills }: TitledTagCloudProps) => {
         </div>
         <a
           href="/skills"
-          className=" bg-black text-white px-6 py-3 font-bold uppercase border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all whitespace-nowrap  md:w-auto text-center flex items-center gap-2"
+          className={`bg-black text-white px-6 py-3 font-bold uppercase border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-[${Theme.colors.yellow[400]}] hover:text-black transition-all whitespace-nowrap  md:w-auto text-center flex items-center gap-2`}
         >
-          View Full Skill Matrix <ArrowBigRight />
+          Full Skill Matrix <ArrowBigRight />
         </a>
       </div>
     </section>

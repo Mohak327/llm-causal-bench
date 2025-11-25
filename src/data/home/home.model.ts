@@ -27,7 +27,7 @@ export const homeData = {
     { label: "Focus", value: "Healthcare, Environment, Finance" },
   ],
   techArsenal: {
-    title: "Technical Arsenal",
+    title: "Developer Arsenal",
     skills: [
       "Python",
       "C++",

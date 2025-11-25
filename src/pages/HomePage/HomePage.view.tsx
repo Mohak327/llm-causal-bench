@@ -5,7 +5,7 @@ import TitledCardList from "../../components/Organisms/TitledCardList/TitledCard
 import TitledContentBox from "../../components/Organisms/TitledContentBox/TitledContentBox.view";
 import SiteFooter from "../../components/Organisms/SiteFooter/SiteFooter.view";
 import { ExternalLink, Brain } from "lucide-react";
-import Marquee from "../../components/Organisms/Marquee/Marquee.view";
+import Marquee from "../../components/Molecules/Marquee/Marquee.view";
 
 const HomeView = () => {
   return (
