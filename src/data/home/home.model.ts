@@ -1,6 +1,7 @@
 
 import { allProjects } from "@/data/projects/projects.model";
 import { Theme } from "../../Theme";
+import { ArrowBigRight } from "lucide-react";
 
 export const homeData = {
   marquee:
@@ -40,6 +41,9 @@ export const homeData = {
       "Pytorch",
       "MongoDB",
     ],
+    ctaLink: "/skills",
+    ctaText: "Full Skill Matrix",
+    ctaIcon: ArrowBigRight,
   },
   experience: {
     title: "Experience",
@@ -49,7 +53,7 @@ export const homeData = {
         company: "CRIS Lab, NY",
         duration: "2025 - Present",
         tasks: [
-          "Analyzed Predicted Aligned Error (PAE) for 400-dim protein matrices.",
+          "Analyzed Predicted Aligned Error (PAE) for 400-dimensional protein matrices.",
           "Probed embeddings from 200K+ protein structures (AlphaFold DB) across 48 transformer layers.",
           "Uncovered principles of biological representation for drug discovery.",
         ],

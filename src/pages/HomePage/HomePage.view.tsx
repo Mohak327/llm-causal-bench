@@ -22,7 +22,10 @@ const HomeView = () => {
         />
         <TitledTagCloud
           title={homeData.techArsenal.title}
-          skills={homeData.techArsenal.skills}
+          items={homeData.techArsenal.skills}
+          ctaLink={homeData.techArsenal.ctaLink}
+          ctaText={homeData.techArsenal.ctaText}
+          ctaIcon={homeData.techArsenal.ctaIcon}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
