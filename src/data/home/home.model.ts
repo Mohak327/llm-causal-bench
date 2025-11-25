@@ -1,3 +1,5 @@
+
+import { allProjects } from "@/data/projects/projects.model";
 import { Theme } from "../../Theme";
 
 export const homeData = {
@@ -82,30 +84,16 @@ export const homeData = {
   },
   projects: {
     title: "Projects",
-    items: [
-      {
-        projectId: "neural",
-        link: "/projects/neural",
-        category: "Neuroscience / Causal ML",
-        title: "Causal & Time Series Analysis of Neural Activity",
-        description:
-          "Using Hodgkin-Huxley & Rinzel models to investigate synaptic activity.",
-        tags: ["Python", "Simulations"],
-        accent: Theme.colors.pink[400],
-        bgColor: Theme.colors.pink[400],
-      },
-      {
-        projectId: "cardiac",
-        link: "/projects/cardiac",
-        category: "HealthTech / Biophysics",
-        title: "Computational Cardiac Modeling",
-        description:
-          "ECG signal modeling and Phase Response Curve (PRC) analysis using nonlinear ODE simulations.",
-        tags: ["Biophysics", "Nonlinear ODE"],
-        accent: Theme.colors.green[400],
-        bgColor: Theme.colors.green[400],
-      },
-    ],
+    items: allProjects.map((p) => ({
+      id: p.id,
+      link: `/projects/${p.id}`,
+      category: p.category,
+      title: p.title,
+      description: p.summary,
+      tags: p.tags,
+      accent: p.accentColor,
+      bgColor: p.accentColor,
+    })),
   },
   education: {
     title: "Education",

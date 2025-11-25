@@ -24,7 +24,7 @@ const TitledCardList = <
         <h2 className="text-4xl font-black uppercase">{title}</h2>
       </div>
       {items.map((item, index) => (
-        <ConditionLinkView target="_blank" link={item.link} key={item.link}>
+        <ConditionLinkView link={item.link} key={item.link}>
           <Card
             bgColor={item.bgColor ? item.bgColor : "white"}
             accentColor={item.accent ? item.accent : "white"}

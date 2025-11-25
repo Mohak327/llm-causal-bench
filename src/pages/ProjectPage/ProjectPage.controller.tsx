@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { getProjectData } from "./ProjectDetail.model";
-import ProjectDetailView from "./ProjectDetail.view";
+import { getProjectById } from "@/data/projects/projects.model";
+import ProjectDetailView from "./ProjectPage.view";
 
 interface ProjectDetailControllerProps {
   id: string;
@@ -10,13 +10,13 @@ interface ProjectDetailControllerProps {
 const ProjectDetailController: React.FC<ProjectDetailControllerProps> = ({
   id,
 }) => {
-  const project = getProjectData(id);
+  const project = getProjectById(id);
 
   if (!project) {
     return <div>Project not found.</div>;
   }
 
-  return <ProjectDetailView projectId={id} {...project} />;
+  return <ProjectDetailView {...project} />;
 };
 
 export default ProjectDetailController;

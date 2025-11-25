@@ -1,4 +1,4 @@
-import { homeData } from "./Home.model";
+import { homeData } from "../../data/home/home.model";
 import HeroSection from "../../components/Organisms/HeroSection/HeroSection.view";
 import TitledTagCloud from "../../components/Organisms/TitledTagCloud/TitledTagCloud.view";
 import TitledCardList from "../../components/Organisms/TitledCardList/TitledCardList.view";

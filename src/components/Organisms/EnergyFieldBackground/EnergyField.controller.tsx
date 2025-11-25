@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef } from 'react';
 import { PhysicsService } from '../../../services/physics/Physics.service';
 import type { IPhysicsSimulation } from '../../../services/physics/Physics.interface';
@@ -13,13 +15,16 @@ const EnergyFieldController: React.FC = () => {
   const lastScrollYRef = useRef(0);
 
   useEffect(() => {
-    mouseRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    lastScrollYRef.current = window.scrollY;
+    // Ensure we're in the browser before accessing window
+    if (typeof window === 'undefined') return;
     
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    mouseRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    lastScrollYRef.current = window.scrollY;
 
     let animationFrameId: number;
 

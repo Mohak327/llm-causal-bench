@@ -1,4 +1,4 @@
-import HomeView from './Home.view';
+import HomeView from './HomePage.view';
 
 const HomeController = () => {
   return <HomeView />;

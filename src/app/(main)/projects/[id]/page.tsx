@@ -1,4 +1,4 @@
-import ProjectDetailController from "@/pages/ProjectDetail/ProjectDetail.controller";
+import ProjectDetailController from "@/pages/ProjectPage/ProjectPage.controller";
 import { use } from "react";
 
 const Page = ({ params }: { params: Promise<{ id: string }> }) => {
