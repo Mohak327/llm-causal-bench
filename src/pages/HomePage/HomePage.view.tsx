@@ -1,13 +1,17 @@
+"use client";
 import { homeData } from "../../data/home/home.model";
 import HeroSection from "../../components/Organisms/HeroSection/HeroSection.view";
 import TitledTagCloud from "../../components/Organisms/TitledTagCloud/TitledTagCloud.view";
 import TitledCardList from "../../components/Organisms/TitledCardList/TitledCardList.view";
 import TitledContentBox from "../../components/Organisms/TitledContentBox/TitledContentBox.view";
 import SiteFooter from "../../components/Organisms/SiteFooter/SiteFooter.view";
-import { ExternalLink, Brain } from "lucide-react";
+import { ExternalLink, Brain, LucideIcon } from "lucide-react";
 import Marquee from "../../components/Molecules/Marquee/Marquee.view";
+import { HomeViewProps } from "./HomePage.interface";
+import RichTextController from "@/components/Organisms/RichTextList/RichTextList.controller";
 
-const HomeView = () => {
+const HomeView = ({ techArsenal }: HomeViewProps) => {
+  // console.log("techArsenal", techArsenal);
   return (
     <div
       className={`min-h-screen text-black font-mono selection:bg-black selection:text-white overflow-x-hidden`}
@@ -21,11 +25,11 @@ const HomeView = () => {
           meta={homeData.meta}
         />
         <TitledTagCloud
-          title={homeData.techArsenal.title}
-          items={homeData.techArsenal.skills}
-          ctaLink={homeData.techArsenal.ctaLink}
-          ctaText={homeData.techArsenal.ctaText}
-          ctaIcon={homeData.techArsenal.ctaIcon}
+          title={techArsenal.title}
+          items={techArsenal.skills}
+          ctaLink={techArsenal.ctaLink}
+          ctaText={techArsenal.ctaText}
+          ctaIcon={techArsenal.ctaIcon}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -45,11 +49,12 @@ const HomeView = () => {
                 </h3>
                 <div className="text-lg font-bold mb-4 flex items-center gap-2">
                   {job.company}{" "}
-                  {job.company.includes("CRIS") && <ExternalLink size={16} />}
                 </div>
-                <ul className="list-disc list-inside space-y-2 text-sm font-medium">
-                  {job.tasks.map((task, i) => (
-                    <li key={i}>{task}</li>
+                <ul className="list-disc list-inside space-y-2">
+                  {job.tasks.map((task, index) => (
+                    <li key={index} className="text-sm">
+                      <RichTextController text={task} />
+                    </li>
                   ))}
                 </ul>
               </>

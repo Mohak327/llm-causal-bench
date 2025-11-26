@@ -1,5 +1,5 @@
-import HomeView from "@/pages/HomePage/HomePage.view";
+import HomeController from "@/pages/HomePage/HomePage.controller";
 
 export default function Page() {
-  return <HomeView />;
+  return <HomeController />;
 }

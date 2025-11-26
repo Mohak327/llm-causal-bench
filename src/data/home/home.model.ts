@@ -25,22 +25,10 @@ export const homeData = {
   },
   meta: [
     { label: "Location", value: "New York, NY" },
-    { label: "Focus", value: "Healthcare, Environment, Finance" },
+    // { label: "Focus", value: "Healthcare, Environment, Finance" },
   ],
   techArsenal: {
     title: "Developer Arsenal",
-    skills: [
-      "Python",
-      "C++",
-      "React 19",
-      "Next.js",
-      "TypeScript",
-      "GraphQL",
-      "AWS",
-      "AlphaFold",
-      "Pytorch",
-      "MongoDB",
-    ],
     ctaLink: "/skills",
     ctaText: "Full Skill Matrix",
     ctaIcon: ArrowBigRight,
@@ -49,26 +37,31 @@ export const homeData = {
     title: "Experience",
     jobs: [
       {
-        role: "Graduate Research Assistant",
-        company: "CRIS Lab, NY",
+        role: "Student Research Assistant",
+        company: "Complex Resilient Intelligent Systems Laboratory (CRIS), Columbia University",
         duration: "2025 - Present",
+        link: undefined,
         tasks: [
-          "Analyzed Predicted Aligned Error (PAE) for 400-dimensional protein matrices.",
-          "Probed embeddings from 200K+ protein structures (AlphaFold DB) across 48 transformer layers.",
-          "Uncovered principles of biological representation for drug discovery.",
+          "Leveraged **statistical** and *machine learning* models and protein structure visualization tools like __ChimeraX__ to analyze Predicted Aligned Error (PAE) matrices, uncovering mechanistic insights into protein interactions and structural uncertainty in 400-dimensional protein structures.",
+          "Probed embeddings from __200K+__ protein structures (AlphaFold DB) across 48 transformer layers.",
+          "Uncovered principles of biological representation for *drug discovery*.",
         ],
         accent: Theme.colors.purple[400],
         bgColor: Theme.colors.white,
       },
       {
-        role: "Full Stack Engineer",
+        role: "Full Stack Engineer (Growth)",
         company: "Outscal, India",
         duration: "2023 - 2025",
+        link: undefined,
         tasks: [
-          "Overhauled architecture with Next.js & GraphQL, boosting performance by 35%.",
-          "Developed a JIT compiler cutting execution time by 40%.",
-          "Optimized Web Vitals by 800% via SEO refactoring.",
-          "Migrated JS codebase to TypeScript using AI tools.",
+          "Overhauled website architecture using Next.js and GraphQL, implementing object-oriented design patterns for scalability, boosting pageperformance by 35%, and reliably serving a userbase exceeding 400K+ users.",
+          "Integrated Strapi as an end-to-end CMS and UI builder for real-time page creation and deployment, saving 60+ dev hours/week, effectively making everyone in the team a front-end developer.",
+          "Developed a JIT compiler with Piston and JDoodle, enabling users to run code in-browser and cutting execution time by 40%.",
+          "Optimized SEO by refactoring codebase, generating XML sitemaps, and embedding structured data, resulting in improved search enginerankings and Web Vitals scores (CLS, TBT, LCP, Speed Index) by up to 800%, down to 100ms for some pages",
+          "Scheduled deployments, allocated cloud resources, and operated cross-team risk/issue management; set up monitoring systems withCloudWatch and Lambda, reducing downtime alerts by 50%.",
+          "Directed product management by analyzing user funnel data, shaping business requirements with stakeholders, and collaborating across teams to run targeted product experiments as sole growth engineer, increasing conversion rates by 15%.",
+          "Migrated JavaScript codebase into TypeScript leveraging Jules AI, Codex, and Google Gemini; leveraged AI tools to streamline code reviewsand prototyping, enhancing developer productivity by ~50%."
         ],
         accent: Theme.colors.yellow[400],
         bgColor: Theme.colors.white,
@@ -77,6 +70,7 @@ export const homeData = {
         role: "Frontend Web Developer",
         company: "Travclan",
         duration: "2022 - 2023",
+        link: undefined,
         tasks: [
           "Built React admin panel accelerating output by 40% for 250+ teammates.",
           "Implemented micro-frontend architecture, cutting build sizes by 35%.",
@@ -103,16 +97,16 @@ export const homeData = {
     title: "Education",
     degrees: [
       {
-        university: "Columbia University",
-        year: "2026",
+        university: "Columbia University (NY, USA)",
+        year: "2025 - 2027",
         degree: "M.S. Computer Science",
         courses:
-          "Coursework: Machine Learning, Causal Inference, Computational Neuroscience, Quantum Computing.",
+          "Coursework: Machine Learning, Causal Inference, Computational Neuroscience, Quantum Computing, Mechanistic Interpretibility of Neural Nets.",
         bgColor: Theme.colors.blue[100],
       },
       {
-        university: "GGSIPU",
-        year: "2023",
+        university: "GGSIPU (Delhi, India)",
+        year: "2019 - 2023",
         degree: "B.Tech Computer Science",
         courses:
           "Coursework: Advanced Math, Physics, OOPS, Data Structures, Networks, OS, DBMS, Engineering Mechanics, Circuits & Systems, Computer Organisation & Architecture, Theory of Computation, Agile Methodologies, Switching Theory & Logical Design.",

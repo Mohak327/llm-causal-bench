@@ -1,20 +1,19 @@
 "use client";
 import { ProjectInterface } from "@/data/projects/projects.interface";
 import React from "react";
+import ContentRenderer from "../../components/Organisms/ContentRenderer/ContentRenderer.view";
 
 const ProjectDetailView: React.FC<ProjectInterface> = ({
   id,
   accentColor,
   title,
-  description,
-  results,
+  sections,
   tags,
 }) => {
   if (!id) {
     return <div>Project not found.</div>;
   }
 
-  console.log("accentColor", accentColor);
 
   return (
     <div className="min-h-screen bg-white">
@@ -37,56 +36,30 @@ const ProjectDetailView: React.FC<ProjectInterface> = ({
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div className="md:col-span-2 space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold uppercase border-b-4 border-black inline-block mb-4">
-                Overview
-              </h2>
-              <p className="text-lg leading-relaxed font-medium">
-                {description}
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold uppercase border-b-4 border-black inline-block mb-4">
-                Key Outcomes
-              </h2>
-              <ul className="space-y-3">
-                {results.map((res, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span className="bg-black text-white font-bold w-6 h-6 flex items-center justify-center text-sm mt-1 shrink-0">
-                      {idx + 1}
-                    </span>
-                    <span className="font-medium text-lg">{res}</span>
-                  </li>
-                ))}
-              </ul>
+      <div className="flex gap-2 container mx-auto px-4 py-12 max-w-4xl gap-8">
+        <div className="flex-1">
+          <ContentRenderer sections={sections} />
+        </div>
+        <div className="max-w-[240px] w-full">
+          <div className="border-4 border-black p-6 bg-[#f0f0f0]">
+            <h3 className="font-black uppercase mb-4">Tech Stack</h3>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-1 border-2 border-black bg-white font-bold text-xs uppercase"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="border-4 border-black p-6 bg-[#f0f0f0]">
-              <h3 className="font-black uppercase mb-4">Tech Stack</h3>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-1 border-2 border-black bg-white font-bold text-xs uppercase"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-4 border-black p-6 bg-black text-white">
-              <h3 className="font-black uppercase mb-4">Role</h3>
-              <p className="font-bold">Researcher / Engineer</p>
-              <div className="mt-4 pt-4 border-t-2 border-white/30 text-sm opacity-80">
-                Focus: Simulation & Analysis
-              </div>
+          <div className="border-4 border-black p-6 bg-black text-white">
+            <h3 className="font-black uppercase mb-4">Role</h3>
+            <p className="font-bold">Researcher / Engineer</p>
+            <div className="mt-4 pt-4 border-t-2 border-white/30 text-sm opacity-80">
+              Focus: Simulation & Analysis
             </div>
           </div>
         </div>
