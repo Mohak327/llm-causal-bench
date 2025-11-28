@@ -77,11 +77,11 @@ const HomeView = ({ techArsenal }: HomeViewProps) => {
                   <p className="text-sm font-bold mb-4 border-l-4 border-black pl-4">
                     {project.description}
                   </p>
-                  <div className="flex gap-2">
-                    {project.tags.map((tag) => (
+                  <div className="flex flex-wrap gap-2">
+                    {project.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="bg-black text-white px-2 py-1 text-xs font-bold"
+                        className="bg-black text-white flex-none w-auto px-2 py-1 text-xs font-bold text-center"
                       >
                         {tag}
                       </span>

@@ -37,7 +37,12 @@ const projects: ProjectInterface[] = [
         ],
       },
     ],
-    tags: ["Neuroscience", "Python", "Hodgkin-Huxley", "Simulations"],
+    tags: [
+      "Neuroscience",
+      "Causal Inference",
+      "Neuron Modeling",
+      "Simulations",
+    ],
     accentColor: Theme.colors.pink[400],
   },
   {
@@ -112,8 +117,105 @@ const projects: ProjectInterface[] = [
         ],
       },
     ],
-    tags: ["BioPhysics", "Nonlinear ODE", "Python"],
+    tags: [
+      "BioPhysics",
+      "Nonlinear ODE",
+      "ECG Modeling",
+      "Cardiology",
+      "Phase Response Curve",
+    ],
     accentColor: Theme.colors.green[400],
+  },
+  {
+    id: "temporal-encoding-machines",
+    title: "Temporal Encoding and Decoding in Neural Circuits",
+    subtitle: "Exploring Signal Processing in Neural Models",
+    category: "Computational Neuroscience",
+    summary:
+      "Implementation of temporal encoding machines and time decoding machines for signal processing in neural circuits, focusing on ASDM and IAF neurons.",
+    sections: [
+      {
+        heading: "Overview",
+        content: [
+          {
+            type: "paragraph",
+            data: "This project implements temporal encoding machines (TEM) and time decoding machines (TDM) for signal processing in neural circuits, focusing on asynchronous sigma-delta modulators (ASDM) and integrate-and-fire (IAF) neurons.",
+          },
+          {
+            type: "paragraph",
+            data: "It explores how biological-inspired models encode and decode bandlimited signals, assesses recovery quality through signal-to-noise ratio (SNR) analysis, and examines nonlinear processing via ON-OFF separation.",
+          },
+          {
+            type: "paragraph",
+            data: "The work demonstrates the challenges of perfect recovery in nonlinear systems and provides quantitative evaluations of encoding/decoding fidelity.",
+          },
+        ],
+      },
+      {
+        heading: "Technical Implementation",
+        content: [
+          {
+            type: "list",
+            data: [
+              "ASDM Encoding/Decoding: Implemented a threshold-sensitive ASDM encoder to generate spike times from bandlimited stimuli (sum of sinc functions). Developed both δ-sensitive and δ-insensitive decoders using matrix-based reconstruction (pseudoinverse of cumulative sinc integrals), enabling robust recovery despite parameter variations.",
+              "IAF Neuron Modeling: Built an IAF encoder for temporal encoding, with decoding via sinc basis functions. Simulated ON-OFF separation by rectifying signals into positive (ON) and negative (OFF) components, encoding/decoding each independently, and recombining for full-signal reconstruction.",
+              "Signal Analysis: Computed whole-signal and time-varying SNR to evaluate recovery quality. Analyzed phase response curves (PRCs) for limit cycle dynamics, inferring optimal perturbation timings to minimize heartbeat disruptions.",
+              "Numerical Methods: Used Euler integration for ODE solving, cumulative trapezoidal integration for matrix computations, and cross-correlation for PRC estimation. Handled nonlinear dynamics with state bounding and error handling for stability.",
+              "Visualization: Generated comparative plots for waveforms, recovery errors, and SNR over time, with parameter sweeps (e.g., bias values) to study system behavior.",
+            ],
+          },
+        ],
+      },
+      {
+        heading: "Key Achievements",
+        content: [
+          {
+            type: "ordered-list",
+            data: [
+              "High-Fidelity Recovery: Achieved accurate signal reconstruction with SNR values up to 30-40 dB for bandlimited cases, demonstrating effective handling of temporal encoding challenges.",
+              "Robust Algorithms: Developed δ-insensitive decoding that outperforms δ-sensitive methods in noisy or variable conditions, reducing reconstruction errors by 10-20% in simulations.",
+              "Nonlinear Insights: Quantified the impact of ON-OFF separation on recovery, showing how rectification introduces high-frequency harmonics, preventing perfect reconstruction while enabling feature extraction.",
+              "Parameter Optimization: Analyzed bias effects (e.g., b=1 vs. b=0.2) on spike rates and SNR, identifying trade-offs between fidelity and efficiency—key for real-world neural models.",
+              "Quantitative Analysis: Provided time-resolved SNR plots and PRC-based inferences, offering data-driven recommendations for safe neural perturbations (e.g., cardioversion timing).",
+            ],
+          },
+        ],
+      },
+      {
+        heading: "Technologies & Skills",
+        content: [
+          {
+            type: "list",
+            data: [
+              "Python (NumPy, SciPy, Matplotlib)",
+              "Signal Processing",
+              "Neural Circuit Modeling",
+              "SNR Analysis",
+              "Data Visualization",
+              "Scientific Computing",
+            ],
+          },
+        ],
+      },
+      {
+        heading: "Impact",
+        content: [
+          {
+            type: "paragraph",
+            data: "This work contributes to the understanding of temporal coding in neural circuits and provides a foundation for future research on efficient neural computation and its applications in biomedical engineering and artificial intelligence.",
+          },
+        ],
+      },
+    ],
+    tags: [
+      "Synaptic Neural Networks",
+      "Signal Processing",
+      "Neural Circuits",
+      "Signal to Noise Ratio Analysis",
+      "ASDM",
+      "IAF Neurons",
+    ],
+    accentColor: Theme.colors.blue[400],
   },
 ];
 

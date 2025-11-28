@@ -11,7 +11,7 @@ const TitledTagCloud = ({ title, items, ctaLink, ctaText, ctaIcon: CtaIcon }: Ti
       >
         {title}
       </div>
-      <div className="flex flex-col md:flex-row items-start gap-6 mt-4">
+      <div className="flex flex-col md:flex-row items-center gap-6 mt-4">
         <div className="flex flex-wrap gap-3 flex-1">
           {items.map((item) => (
             <span
