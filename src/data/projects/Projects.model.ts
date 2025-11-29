@@ -217,6 +217,67 @@ const projects: ProjectInterface[] = [
     ],
     accentColor: Theme.colors.blue[400],
   },
+  {
+    id: "dft-image-reconstruction",
+    title:
+      "Behind the Waves: Visualizing Image Reconstruction with 2D Discrete Fourier Transform",
+    subtitle: "Visualizing Image Reconstruction with Fourier Transform",
+    category: "Computational Imaging / Signal Processing",
+    summary:
+      "Exploring the decomposition and reconstruction of images using 2D Discrete Fourier Transform (DFT) to understand the role of frequency components in image structure.",
+    tags: [
+      "Image Reconstruction",
+      "Fourier Transform",
+      "Computer Vision",
+      "Signal Processing",
+      "Computational Imaging",
+    ],
+    role: "Researcher / Engineer",
+    focus: "Simulation & Analysis",
+    github: new URL("https://github.com/Mohak327/2D-DFT-Visualisation"),
+    accentColor: Theme.colors.orange[400],
+    sections: [
+      {
+        heading: "Overview",
+        content: [
+          {
+            type: "paragraph",
+            data: "There is something wild about realizing that <span class='highlight'><b>every scene, every photograph, every pattern your eyes can register is, at some level, just a particular mixture of waves</b></span>. Even beyond what humans can see, there is an endless spectrum of frequencies, and yet with the right combination of them, you can recreate any image, any signal, with almost absurd precision. The idea that an image of a face, a galaxy, or a handwritten digit can all be broken down into oscillations—and then rebuilt from those oscillations—makes the Fourier transform feel less like a technical tool and more like a fundamental language of structure and pattern.",
+          },
+          {
+            type: "paragraph",
+            data: "Encountering the discrete and fast Fourier transform in a quantum computing class made this even more striking: here was the same mathematical idea quietly real-world signal processing and the inner workings of quantum algorithms. The leap from <b>“here is a beautiful equation”</b> to <b>“this is the backbone of how we analyze, compress, and reconstruct information”</b> was what made the topic feel genuinely powerful rather than just exam material. It suggested that underneath the complexity of images and signals, there is a very clean, almost musical structure waiting to be exposed by the right transform.",
+          },
+        ],
+      },
+      {
+        heading: "Why Visualize Image Reconstruction?",
+        content: [
+          {
+            type: "paragraph",
+            data: "This project grew out of wanting to see that structure in action instead of only trusting the theory. If a 2D discrete Fourier transform can really decompose an image into a sum of oscillations, then an equally important part of the story is watching those oscillations put the image back together. Building a simple visualizer that reconstructs an image step by step from its frequency components became the first thing to try: a way to watch low frequencies paint the broad strokes and high frequencies carve in the details, frame by frame. It was a small, concrete experiment to feel the power of the Fourier transform, not just admire it on the page.",
+          },
+        ],
+      },
+      {
+        heading: "What Next?",
+        content: [
+          {
+            type: "paragraph",
+            data: "<b>Image Quality, Super-Resolution, and Generation</b>",
+          },
+          {
+            type: "paragraph",
+            data: "While this project focuses on visualizing reconstruction from existing frequency components, the same ideas extend to improving or generating images by learning to <b>“fill in”</b> missing frequencies. In modern computer vision, many super-resolution and inpainting methods explicitly operate in, or are constrained by, the frequency domain to recover high-frequency details that make images look sharper and more realistic.",
+          },
+          {
+            type: "paragraph",
+            data: "Conceptually, one can train ML models on images’ frequency representations to predict or refine high-frequency components, effectively adding back detail that was lost due to downsampling, blur, or corruption—this is the core of frequency-aware <b><span class='highlight'>“image super-resolution”</span></b> and <b><span class='highlight'>frequency-guided inpainting</span></b>. This project sits as a foundational step in that direction: it builds intuition for how frequencies encode structure and detail, which is exactly what these models learn to manipulate when improving image quality or reconstructing missing content.",
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export const allProjects = projects;

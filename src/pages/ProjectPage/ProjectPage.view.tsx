@@ -2,24 +2,31 @@
 import { ProjectInterface } from "@/data/projects/projects.interface";
 import React from "react";
 import ContentRenderer from "../../components/Organisms/ContentRenderer/ContentRenderer.view";
+import Link from "next/link";
+import { FaGithub } from "react-icons/fa";
+import { GrTechnology } from "react-icons/gr";
+import { RiFocus3Line } from "react-icons/ri";
 
 const ProjectDetailView: React.FC<ProjectInterface> = ({
   id,
   accentColor,
   title,
+  subtitle,
   sections,
   tags,
+  role,
+  focus,
+  github,
 }) => {
   if (!id) {
     return <div>Project not found.</div>;
   }
 
-
   return (
     <div className="min-h-screen bg-white">
       <div
         style={{ backgroundColor: accentColor }}
-        className={`h-64 border-b-4 border-black relative overflow-hidden`}
+        className={`border-b-4 border-black relative overflow-hidden`}
       >
         <div
           className="absolute inset-0 opacity-20"
@@ -30,9 +37,14 @@ const ProjectDetailView: React.FC<ProjectInterface> = ({
           }}
         ></div>
         <div className="container mx-auto h-full flex items-end p-4 md:p-8 relative z-10">
-          <h1 className="text-4xl md:text-6xl font-black uppercase bg-white border-4 border-black px-4 py-2 inline-block shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-            {title}
-          </h1>
+          <div className="bg-white border-4 border-black p-4 inline-block shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <h1 className="text-3xl md:text-5xl font-black uppercase">
+              {title}
+            </h1>
+            {/* <h2 className="text-2xl md:text-4xl font-black">
+              {subtitle}
+            </h2> */}
+          </div>
         </div>
       </div>
 
@@ -41,8 +53,27 @@ const ProjectDetailView: React.FC<ProjectInterface> = ({
           <ContentRenderer sections={sections} />
         </div>
         <div className="max-w-[240px] w-full">
+          <div className="border-4 border-black p-6 bg-black text-white">
+            <h3 className="flex items-center gap-2 font-black uppercase mb-4 text-lg">
+              <FaGithub /> Github
+            </h3>
+            {github && (
+              <Link
+                href={github.toString()}
+                className="font-bold underline transition-all break-all hover:text-[var(--accent-color)]"
+                style={{ "--accent-color": accentColor } as React.CSSProperties}
+              >
+                {" "}
+                {github.toString()}{" "}
+              </Link>
+            )}
+          </div>
+
           <div className="border-4 border-black p-6 bg-[#f0f0f0]">
-            <h3 className="font-black uppercase mb-4">Tech Stack</h3>
+            <h3 className=" flex items-center gap-2 font-black uppercase mb-4">
+              <GrTechnology />
+              Tech Stack
+            </h3>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <span
@@ -56,11 +87,15 @@ const ProjectDetailView: React.FC<ProjectInterface> = ({
           </div>
 
           <div className="border-4 border-black p-6 bg-black text-white">
-            <h3 className="font-black uppercase mb-4">Role</h3>
-            <p className="font-bold">Researcher / Engineer</p>
-            <div className="mt-4 pt-4 border-t-2 border-white/30 text-sm opacity-80">
-              Focus: Simulation & Analysis
-            </div>
+            <h3 className="flex items-center gap-2 font-black uppercase mb-4">
+              <RiFocus3Line /> Focus
+            </h3>
+            <p className="font-bold">{focus}</p>
+            {role && (
+              <div className="mt-4 pt-4 border-t-2 border-white/30 text-sm opacity-80">
+                Role: {role}
+              </div>
+            )}
           </div>
         </div>
       </div>

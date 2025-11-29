@@ -14,6 +14,7 @@ export interface SiteFooterProps {
             text: string;
             href: string;
             hoverClass: string;
+            icon?: React.ReactNode;
         }[];
     };
     copyright: string;

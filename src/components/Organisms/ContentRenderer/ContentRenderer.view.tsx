@@ -1,5 +1,6 @@
 import React from "react";
 import { ContentRendererProps } from "./ContentRenderer.interface";
+import RichTextController from "../RichTextList/RichTextList.controller";
 
 const ContentRenderer: React.FC<ContentRendererProps> = ({ sections }) => {
   return (
@@ -14,11 +15,8 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ sections }) => {
               switch (item.type) {
                 case "paragraph":
                   return (
-                    <p
-                      key={idx}
-                      className="font-medium text-md"
-                    >
-                      {item.data as string}
+                    <p key={idx} className="font-medium text-md">
+                      <RichTextController text={item.data as string} />
                     </p>
                   );
                 case "list":
@@ -26,24 +24,21 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ sections }) => {
                     <ul key={idx} className="list-disc list-inside space-y-2">
                       {(item.data as string[]).map((listItem, listIdx) => (
                         <li key={listIdx} className="font-medium text-md">
-                          {listItem}
+                          <RichTextController text={listItem} />
                         </li>
                       ))}
                     </ul>
                   );
                 case "ordered-list":
                   return (
-                    <ol
-                      key={idx}
-                      className="list-decimal list-inside space-y-2"
-                    >
+                    <ol key={idx} className="list-decimal list-inside space-y-2">
                       {(item.data as string[]).map((listItem, listIdx) => (
                         <li key={listIdx} className="flex items-start gap-3">
                           <span className="bg-black text-white font-bold w-6 h-6 flex items-center justify-center text-sm mt-1 shrink-0">
                             {listIdx + 1}
                           </span>
                           <span className="font-medium text-md">
-                            {listItem}
+                            <RichTextController text={listItem} />
                           </span>
                         </li>
                       ))}

@@ -1,7 +1,8 @@
-
 import { allProjects } from "@/data/projects/projects.model";
 import { Theme } from "../../Theme";
 import { ArrowBigRight } from "lucide-react";
+import { MdEmail } from "react-icons/md";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 export const homeData = {
   marquee:
@@ -38,13 +39,13 @@ export const homeData = {
     jobs: [
       {
         role: "Student Research Assistant",
-        company: "Complex Resilient Intelligent Systems Laboratory (CRIS), Columbia University",
+        company:
+          "Complex Resilient Intelligent Systems Laboratory (CRIS), Columbia University",
         duration: "2025 - Present",
         link: undefined,
         tasks: [
-          "Leveraged **statistical** and *machine learning* models and protein structure visualization tools like __ChimeraX__ to analyze Predicted Aligned Error (PAE) matrices, uncovering mechanistic insights into protein interactions and structural uncertainty in 400-dimensional protein structures.",
-          "Probed embeddings from __200K+__ protein structures (AlphaFold DB) across 48 transformer layers.",
-          "Uncovered principles of biological representation for *drug discovery*.",
+          "Leveraged <b>statistical</b> and <i>machine learning</i> models and protein structure visualization tools like <span class='highlight'>ChimeraX</span> to analyze Predicted Aligned Error (PAE) matrices, uncovering mechanistic insights into protein interactions and structural uncertainty in 400-dimensional protein structures.",
+          "Probed embeddings from <span class='highlight'>200K+</span> protein structures (AlphaFold DB) across 48 transformer layers.",
         ],
         accent: Theme.colors.purple[400],
         bgColor: Theme.colors.white,
@@ -61,7 +62,7 @@ export const homeData = {
           "Optimized SEO by refactoring codebase, generating XML sitemaps, and embedding structured data, resulting in improved search enginerankings and Web Vitals scores (CLS, TBT, LCP, Speed Index) by up to 800%, down to 100ms for some pages",
           "Scheduled deployments, allocated cloud resources, and operated cross-team risk/issue management; set up monitoring systems withCloudWatch and Lambda, reducing downtime alerts by 50%.",
           "Directed product management by analyzing user funnel data, shaping business requirements with stakeholders, and collaborating across teams to run targeted product experiments as sole growth engineer, increasing conversion rates by 15%.",
-          "Migrated JavaScript codebase into TypeScript leveraging Jules AI, Codex, and Google Gemini; leveraged AI tools to streamline code reviewsand prototyping, enhancing developer productivity by ~50%."
+          "Migrated JavaScript codebase into TypeScript leveraging Jules AI, Codex, and Google Gemini; leveraged AI tools to streamline code reviewsand prototyping, enhancing developer productivity by ~50%.",
         ],
         accent: Theme.colors.yellow[400],
         bgColor: Theme.colors.white,
@@ -146,13 +147,21 @@ export const homeData = {
       links: [
         {
           text: "ms7306@columbia.edu",
+          icon: MdEmail,
           href: "mailto:ms7306@columbia.edu",
           hoverClass: "hover:px-1 hover:bg-[#ff90e8]",
         },
         {
           text: "LinkedIn Profile",
+          icon: FaLinkedin,
           href: "https://www.linkedin.com/in/sharma-mohak/",
           hoverClass: "hover:px-1 hover:bg-[#0077b5] hover:text-white",
+        },
+        {
+          text: "Github Profile",
+          icon: FaGithub,
+          href: "https://github.com/Mohak327",
+          hoverClass: "hover:px-1 hover:bg-[#5b21b6] hover:text-white",
         },
       ],
     },

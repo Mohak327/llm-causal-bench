@@ -15,3 +15,17 @@ export interface RichTextListProps {
 export interface RichTextListViewProps {
   parsedItems: ReactElement[][];
 }
+
+export type NodeType = "root" | "text" | "b" | "i" | "highlight";
+
+export type ElementNode = {
+    type: Exclude<NodeType, "text">;
+    children: Node[];
+};
+
+type TextNode = {
+  type: "text";
+  value: string;
+};
+
+export type Node = TextNode | ElementNode;

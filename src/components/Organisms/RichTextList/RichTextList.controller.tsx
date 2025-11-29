@@ -1,58 +1,87 @@
 import React, { ReactElement } from "react";
 import RichTextView from "./RichTextList.view";
 import { RichTextProps } from "./RichTextList.interface";
+import { Node, ElementNode } from "./RichTextList.interface";
+import { OPEN_TAGS } from "./RichTextList.model";
 
-const parseText = (text: string): ReactElement[] => {
-  const elements: ReactElement[] = [];
-  const regex = /(\*\*.*?\*\*|\*.*?\*|__.*?__|\n)/g;
-  let lastIndex = 0;
-  let match;
-  let keyCounter = 0;
+const parseToNodes = (text: string): Node[] => {
+  const root: ElementNode = { type: "root", children: [] };
+  const stack: ElementNode[] = [root];
+  let buffer = "";
 
-  while ((match = regex.exec(text)) !== null) {
-    // Add text before match
-    if (match.index > lastIndex) {
-      elements.push(
-        <span key={keyCounter++}>{text.slice(lastIndex, match.index)}</span>
-      );
+  const flushText = () => {
+    if (!buffer) return;
+    stack[stack.length - 1].children.push({ type: "text", value: buffer });
+    buffer = "";
+  };
+
+  const tryMatch = (substr: string, index: number): string | null => {
+    return text.startsWith(substr, index) ? substr : null;
+  };
+
+  for (let i = 0; i < text.length; ) {
+    const openMatch =
+      tryMatch("<b>", i) ||
+      tryMatch("<i>", i) ||
+      tryMatch("<span class='highlight'>", i);
+
+    if (openMatch) {
+      flushText();
+      const node: ElementNode = {
+        type: OPEN_TAGS[openMatch as keyof typeof OPEN_TAGS],
+        children: [],
+      };
+      stack[stack.length - 1].children.push(node);
+      stack.push(node);
+      i += openMatch.length;
+      continue;
     }
 
-    const matched = match[0];
-    if (matched.startsWith("**") && matched.endsWith("**")) {
-      const content = matched.slice(2, -2);
-      elements.push(<strong key={keyCounter++}>{content}</strong>);
-    } else if (
-      matched.startsWith("*") &&
-      matched.endsWith("*") &&
-      !matched.startsWith("**")
-    ) {
-      const content = matched.slice(1, -1);
-      elements.push(<em key={keyCounter++}>{content}</em>);
-    } else if (matched.startsWith("__") && matched.endsWith("__")) {
-      const content = matched.slice(2, -2);
-      elements.push(
-        <span key={keyCounter++} className="bg-yellow-200 px-1 rounded">
-          {content}
-        </span>
-      );
-    } else if (matched === "\n") {
-      elements.push(<br key={keyCounter++} />);
+    const closeMatch =
+      tryMatch("</b>", i) || tryMatch("</i>", i) || tryMatch("</span>", i);
+
+    if (closeMatch) {
+      flushText();
+      if (stack.length > 1) stack.pop();
+      i += closeMatch.length;
+      continue;
     }
 
-    lastIndex = regex.lastIndex;
+    buffer += text[i++];
   }
 
-  // Add remaining text
-  if (lastIndex < text.length) {
-    elements.push(<span key={keyCounter++}>{text.slice(lastIndex)}</span>);
-  }
-
-  return elements;
+  flushText();
+  return root.children;
 };
 
+const renderNodes = (nodes: Node[], keyPrefix = ""): ReactElement[] =>
+  nodes.map((node, index) => {
+    const key = `${keyPrefix}${index}`;
+
+    if (node.type === "text") {
+      return <span key={key}>{node.value}</span>;
+    }
+
+    const children = renderNodes(node.children, `${key}-`);
+
+    switch (node.type) {
+      case "b":
+        return <b key={key}>{children}</b>;
+      case "i":
+        return <i key={key}>{children}</i>;
+      case "highlight":
+        return (
+          <span key={key} className="bg-yellow-200 px-1 rounded">
+            {children}
+          </span>
+        );
+      default:
+        return <React.Fragment key={key}>{children}</React.Fragment>;
+    }
+  });
+
 const RichTextController: React.FC<RichTextProps> = ({ text }) => {
-    console.log("text", text)
-  const parsedText = parseText(text);
+  const parsedText = renderNodes(parseToNodes(text));
   return <RichTextView parsedText={parsedText} />;
 };
 

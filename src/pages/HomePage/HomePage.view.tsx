@@ -5,13 +5,12 @@ import TitledTagCloud from "../../components/Organisms/TitledTagCloud/TitledTagC
 import TitledCardList from "../../components/Organisms/TitledCardList/TitledCardList.view";
 import TitledContentBox from "../../components/Organisms/TitledContentBox/TitledContentBox.view";
 import SiteFooter from "../../components/Organisms/SiteFooter/SiteFooter.view";
-import { ExternalLink, Brain, LucideIcon } from "lucide-react";
+import { Brain } from "lucide-react";
 import Marquee from "../../components/Molecules/Marquee/Marquee.view";
 import { HomeViewProps } from "./HomePage.interface";
 import RichTextController from "@/components/Organisms/RichTextList/RichTextList.controller";
 
 const HomeView = ({ techArsenal }: HomeViewProps) => {
-  // console.log("techArsenal", techArsenal);
   return (
     <div
       className={`min-h-screen text-black font-mono selection:bg-black selection:text-white overflow-x-hidden`}
@@ -105,7 +104,13 @@ const HomeView = ({ techArsenal }: HomeViewProps) => {
 
         <SiteFooter
           beyondTheCode={homeData.footer.beyondTheCode}
-          contact={homeData.footer.contact}
+          contact={{
+            ...homeData.footer.contact,
+            links: homeData.footer.contact.links.map(link => ({
+              ...link,
+              icon: link.icon ? <link.icon /> : undefined,
+            })),
+          }}
           copyright={homeData.footer.copyright}
         />
       </main>

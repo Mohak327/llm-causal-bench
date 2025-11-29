@@ -17,7 +17,10 @@ export interface ProjectInterface {
   subtitle: string;
   category: string;
   summary: string;
+  role?: string;
+  focus?: string;
   sections: SectionItem[];
   tags: string[];
   accentColor: string;
+  github?: URL;
 }
