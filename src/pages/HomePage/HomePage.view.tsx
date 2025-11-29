@@ -68,7 +68,7 @@ const HomeView = ({ techArsenal }: HomeViewProps) => {
               renderItem={(project) => (
                 <>
                   <div className="bg-white border-2 border-black inline-block px-3 py-1 font-bold text-xs uppercase mb-4">
-                    {project.category}
+                    {project.focus}
                   </div>
                   <h3 className="text-2xl font-black uppercase mb-2 leading-tight">
                     {project.title}

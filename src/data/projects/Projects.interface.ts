@@ -15,7 +15,7 @@ export interface ProjectInterface {
   id: string;
   title: string;
   subtitle: string;
-  category: string;
+  category?: string;
   summary: string;
   role?: string;
   focus?: string;

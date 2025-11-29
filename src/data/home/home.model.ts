@@ -86,7 +86,7 @@ export const homeData = {
     items: allProjects.map((p) => ({
       id: p.id,
       link: `/projects/${p.id}`,
-      category: p.category,
+      focus: p.focus,
       title: p.title,
       description: p.summary,
       tags: p.tags,

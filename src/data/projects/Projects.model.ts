@@ -3,55 +3,15 @@ import { ProjectInterface } from "./projects.interface";
 
 const projects: ProjectInterface[] = [
   {
-    id: "neural",
-    title: "Causal & Time Series Analysis of Neural Activity",
-    subtitle: "Investigating Synaptic Activity",
-    category: "Neuroscience / Causal ML",
-    summary:
-      "Using Hodgkin-Huxley & Rinzel models to investigate synaptic activity.",
-    sections: [
-      {
-        heading: "Overview",
-        content: [
-          {
-            type: "paragraph",
-            data: "Conducted causal inference and time series analysis on simulated and recorded neural signals using Hodgkin-Huxley and Rinzel models.",
-          },
-          {
-            type: "paragraph",
-            data: "The goal was to investigate synaptic activity and signal propagation for neurotechnology applications.",
-          },
-        ],
-      },
-      {
-        heading: "Key Outcomes",
-        content: [
-          {
-            type: "list",
-            data: [
-              "Simulated neural signals successfully.",
-              "Identified key synaptic propagation paths.",
-              "Modeled Rinzel neuron behaviors.",
-            ],
-          },
-        ],
-      },
-    ],
-    tags: [
-      "Neuroscience",
-      "Causal Inference",
-      "Neuron Modeling",
-      "Simulations",
-    ],
-    accentColor: Theme.colors.pink[400],
-  },
-  {
-    id: "cardiac",
+    id: "computational-cardiac-modeling",
     title: "Computational Cardiac Modeling",
     subtitle: "Phase Response Curve Analysis",
-    category: "HealthTech / Biophysics",
+    focus: "HealthTech / Biophysics",
     summary:
       "ECG signal modeling and Phase Response Curve (PRC) analysis using nonlinear ODE simulations.",
+    github: new URL(
+      "https://github.com/Mohak327/computational-cardiac-modeling"
+    ),
     sections: [
       {
         heading: "Overview",
@@ -130,9 +90,10 @@ const projects: ProjectInterface[] = [
     id: "temporal-encoding-machines",
     title: "Temporal Encoding and Decoding in Neural Circuits",
     subtitle: "Exploring Signal Processing in Neural Models",
-    category: "Computational Neuroscience",
+    focus: "Computational Neuroscience",
     summary:
       "Implementation of temporal encoding machines and time decoding machines for signal processing in neural circuits, focusing on ASDM and IAF neurons.",
+    github: new URL("https://github.com/Mohak327/temporal-encoding-machines"),
     sections: [
       {
         heading: "Overview",
@@ -222,7 +183,7 @@ const projects: ProjectInterface[] = [
     title:
       "Behind the Waves: Visualizing Image Reconstruction with 2D Discrete Fourier Transform",
     subtitle: "Visualizing Image Reconstruction with Fourier Transform",
-    category: "Computational Imaging / Signal Processing",
+    focus: "Computational Imaging / Signal Processing",
     summary:
       "Exploring the decomposition and reconstruction of images using 2D Discrete Fourier Transform (DFT) to understand the role of frequency components in image structure.",
     tags: [
@@ -233,7 +194,6 @@ const projects: ProjectInterface[] = [
       "Computational Imaging",
     ],
     role: "Researcher / Engineer",
-    focus: "Simulation & Analysis",
     github: new URL("https://github.com/Mohak327/2D-DFT-Visualisation"),
     accentColor: Theme.colors.orange[400],
     sections: [
@@ -277,6 +237,125 @@ const projects: ProjectInterface[] = [
         ],
       },
     ],
+  },
+  {
+    id: "auditory-system-emulation",
+    title: "Sing Me A Song: Building A Digital Human Ear",
+    subtitle: "From Sound Wave To Spikes",
+    focus: "Computational Neuroscience / Auditory Signal Processing",
+    summary:
+      'Constructing an end-to-end digital model of the human auditory pathway that takes raw sound, passes it through cochlear-like filtering, hair cell transduction, and spiking neuron populations, and then attempts to reconstruct what the ear "hears" from those neural signals.',
+    tags: [
+      "Auditory System",
+      "Cochlea",
+      "Hair Cells",
+      "Neural Encoding",
+      "Computational Neuroscience",
+    ],
+    role: "Researcher / Engineer",
+    github: new URL("https://github.com/Mohak327/sing-me-a-song"),
+    accentColor: Theme.colors.purple[400],
+    sections: [
+      {
+        heading: "Overview",
+        content: [
+          {
+            type: "paragraph",
+            data: 'Hearing starts long before the brain ever "recognizes" a voice or a melody; it begins as raw air pressure ripples hitting the eardrum and being mechanically and electrically transformed by the ear into spikes along the auditory nerve. This project is an attempt to turn that entire chain into code: a digital ear that takes in a waveform and walks it through the same conceptual stages as the human auditory periphery.',
+          },
+          {
+            type: "paragraph",
+            data: "Instead of stopping at a spectrogram or a simple transform, the pipeline explicitly models cochlear filterbanks, inner hair cell nonlinearities, and spiking neuron populations, treating them as successive encoding layers. The goal is not just to analyze sound, but to emulate how the ear itself might encode that sound into patterns of spikes that the brain can read.",
+          },
+        ],
+      },
+      {
+        heading: "Why A Digital Ear?",
+        content: [
+          {
+            type: "paragraph",
+            data: "Most audio projects treat the ear as an invisible black box: they feed in a waveform, compute some features, and train a model, without ever asking how biological hearing actually transforms that waveform. This project came from wanting to trace that path explicitly, step by step, from basilar membrane motion to neural firing, and to see what information survives each transformation.",
+          },
+          {
+            type: "paragraph",
+            data: "By implementing a simplified version of each stage—filterbanks for the cochlea, nonlinear transduction for hair cells, and leaky integrate-and-fire or Hodgkin–Huxley neurons for the auditory nerve—the code becomes a sandbox for asking concrete questions. What does a voice look like as cochlear channel outputs, how do spikes tile time and frequency, and how much of the original sound can be recovered if all you are given is the neural activity?",
+          },
+        ],
+      },
+      {
+        heading: "Inside The Pipeline",
+        content: [
+          {
+            type: "paragraph",
+            data: "The system begins with loading and preprocessing audio, then feeds it through a bank of bandpass filters that approximate tonotopic organization along the cochlea, producing multiple frequency channels that mimic basilar membrane motion. Inner hair cell models then apply nonlinear transformations to convert these mechanical-like signals into receptor potentials.",
+          },
+          {
+            type: "paragraph",
+            data: "These processed signals drive a population of model neurons—implemented as leaky integrate-and-fire or Hodgkin–Huxley units—whose spikes stand in for auditory nerve activity. From there, the project can derive neurograms, spike rasters, and, crucially, attempt audio reconstruction via vocoder-style decoding from channel-wise envelopes and firing rates, closing the loop from sound to spikes and back.",
+          },
+        ],
+      },
+      {
+        heading: "What Next?",
+        content: [
+          {
+            type: "paragraph",
+            data: "<b>Toward Perception-Aware Audio And Neural Experiments</b>",
+          },
+          {
+            type: "paragraph",
+            data: "Right now, the model is a deliberately simplified but end-to-end pipeline; it captures the main stages of the auditory periphery without yet modeling all the biophysical and adaptive complexity of real ears. Next steps include richer cochlear mechanics, more realistic hair cell dynamics, adaptive gain and compression, and more detailed auditory nerve coding strategies such as phase locking limits and multiple fiber types.",
+          },
+          {
+            type: "paragraph",
+            data: "Beyond biological fidelity, this digital ear can serve as a front-end for machine learning models that work on neural-like representations instead of raw waveforms, or as a testbed for questions about information loss, robustness, and perception. How much intelligibility survives different lesions or noise levels, where in the pipeline resolution is most precious, and what kinds of synthetic sounds emerge if one optimizes directly in spike space are all experiments this project is designed to eventually make possible.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "neural",
+    title: "Causal & Time Series Analysis of Neural Activity",
+    subtitle: "Investigating Synaptic Activity",
+    focus: "Neuroscience / Causal ML",
+    summary:
+      "Using Hodgkin-Huxley & Rinzel models to investigate synaptic activity.",
+    sections: [
+      {
+        heading: "Overview",
+        content: [
+          {
+            type: "paragraph",
+            data: "Conducted causal inference and time series analysis on simulated and recorded neural signals using Hodgkin-Huxley and Rinzel models.",
+          },
+          {
+            type: "paragraph",
+            data: "The goal was to investigate synaptic activity and signal propagation for neurotechnology applications.",
+          },
+        ],
+      },
+      {
+        heading: "Key Outcomes",
+        content: [
+          {
+            type: "list",
+            data: [
+              "Simulated neural signals successfully.",
+              "Identified key synaptic propagation paths.",
+              "Modeled Rinzel neuron behaviors.",
+            ],
+          },
+        ],
+      },
+    ],
+    tags: [
+      "Neuroscience",
+      "Causal Inference",
+      "Neuron Modeling",
+      "Simulations",
+    ],
+    accentColor: Theme.colors.pink[400],
   },
 ];
 

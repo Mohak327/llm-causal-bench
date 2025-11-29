@@ -53,11 +53,12 @@ const ProjectDetailView: React.FC<ProjectInterface> = ({
           <ContentRenderer sections={sections} />
         </div>
         <div className="max-w-[240px] w-full">
-          <div className="border-4 border-black p-6 bg-black text-white">
-            <h3 className="flex items-center gap-2 font-black uppercase mb-4 text-lg">
-              <FaGithub /> Github
-            </h3>
-            {github && (
+          {github && (
+            <div className="border-4 border-black p-6 bg-black text-white">
+              <h3 className="flex items-center gap-2 font-black uppercase mb-4 text-lg">
+                <FaGithub /> Github
+              </h3>
+
               <Link
                 href={github.toString()}
                 className="font-bold underline transition-all break-all hover:text-[var(--accent-color)]"
@@ -66,8 +67,8 @@ const ProjectDetailView: React.FC<ProjectInterface> = ({
                 {" "}
                 {github.toString()}{" "}
               </Link>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="border-4 border-black p-6 bg-[#f0f0f0]">
             <h3 className=" flex items-center gap-2 font-black uppercase mb-4">
@@ -86,17 +87,23 @@ const ProjectDetailView: React.FC<ProjectInterface> = ({
             </div>
           </div>
 
-          <div className="border-4 border-black p-6 bg-black text-white">
-            <h3 className="flex items-center gap-2 font-black uppercase mb-4">
-              <RiFocus3Line /> Focus
-            </h3>
-            <p className="font-bold">{focus}</p>
-            {role && (
-              <div className="mt-4 pt-4 border-t-2 border-white/30 text-sm opacity-80">
-                Role: {role}
-              </div>
-            )}
-          </div>
+          {(focus || role) && (
+            <div className="border-4 border-black p-6 bg-black text-white">
+              {focus && (
+                <>
+                  <h3 className="flex items-center gap-2 font-black uppercase mb-4">
+                    <RiFocus3Line /> Focus
+                  </h3>
+                  <p className="font-bold">{focus}</p>
+                </>
+              )}
+              {role && (
+                <div className="mt-4 pt-4 border-t-2 border-white/30 text-sm opacity-80">
+                  Role: {role}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
