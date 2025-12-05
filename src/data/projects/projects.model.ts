@@ -1,5 +1,5 @@
 import { Theme } from "../../Theme";
-import { ProjectInterface } from "./projects_tmp.interface";
+import { ProjectInterface } from "./projects.interface";
 
 export const projects: ProjectInterface[] = [
   {

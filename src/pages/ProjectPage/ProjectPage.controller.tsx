@@ -2,7 +2,7 @@
 import React from "react";
 import { projects } from "@/data/projects/projects.model";
 import ProjectDetailView from "./ProjectPage.view";
-import { ProjectInterface } from "@/data/projects/projects_tmp.interface";
+import { ProjectInterface } from "@/data/projects/projects.interface";
 
 interface ProjectDetailControllerProps {
   id: string;
