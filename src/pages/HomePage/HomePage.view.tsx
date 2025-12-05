@@ -7,7 +7,7 @@ import TitledContentBox from "../../components/Organisms/TitledContentBox/Titled
 import SiteFooter from "../../components/Organisms/SiteFooter/SiteFooter.view";
 import { Brain } from "lucide-react";
 import Marquee from "../../components/Molecules/Marquee/Marquee.view";
-import { HomeViewProps } from "./HomePage_tmp.interface";
+import { HomeViewProps } from "../../data/home/home.interface";
 import RichTextController from "@/components/Organisms/RichTextList/RichTextList.controller";
 
 const HomeView = ({ techArsenal }: HomeViewProps) => {

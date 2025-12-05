@@ -2,7 +2,7 @@
 import { homeData } from "@/data/home/home.model";
 import HomeView from "./HomePage.view";
 import { skillCategories } from "@/data/skills/skills.model";
-import { SkillCategoryProps } from "./HomePage_tmp.interface";
+import { SkillCategoryProps } from "../../data/home/home.interface";
 
 const getTechArsenal = (categories: SkillCategoryProps[]) => {
   const skills: string[] = [];
