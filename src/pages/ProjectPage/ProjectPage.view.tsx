@@ -1,5 +1,5 @@
 "use client";
-import { ProjectInterface } from "@/data/projects/projects.interface";
+import { ProjectInterface } from "@/data/projects/projects_tmp.interface";
 import React from "react";
 import ContentRenderer from "../../components/Organisms/ContentRenderer/ContentRenderer.view";
 import Link from "next/link";
