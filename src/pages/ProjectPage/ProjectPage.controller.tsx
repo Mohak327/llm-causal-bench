@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { projects } from "@/data/projects/projects.model_tmp";
+import { projects } from "@/data/projects/projects.model";
 import ProjectDetailView from "./ProjectPage.view";
 import { ProjectInterface } from "@/data/projects/projects.interface";
 

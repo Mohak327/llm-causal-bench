@@ -1,4 +1,4 @@
-import { projects } from "@/data/projects/projects.model_tmp";
+import { projects } from "@/data/projects/projects.model";
 import { Theme } from "../../Theme";
 import { ArrowBigRight } from "lucide-react";
 import { MdEmail } from "react-icons/md";
