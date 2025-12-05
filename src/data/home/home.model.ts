@@ -20,7 +20,7 @@ export const homeData = {
   status: {
     title: "Current Status",
     lines: [
-      { text: "M.S. CS @ Columbia University", color: "text-green-400" },
+      { text: "MSCS @ Columbia", color: "text-green-400" },
       { text: "Researcher @ CRIS Lab", color: "text-purple-400" },
     ],
   },
