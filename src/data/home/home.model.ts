@@ -1,4 +1,4 @@
-import { allProjects } from "@/data/projects/projects.model";
+import { projects } from "@/data/projects/projects.model_tmp";
 import { Theme } from "../../Theme";
 import { ArrowBigRight } from "lucide-react";
 import { MdEmail } from "react-icons/md";
@@ -10,7 +10,7 @@ export const homeData = {
   hero: {
     title: ["Mohak", "Sharma"],
     subtitle: {
-      prefix: "Engineering the intersection of",
+      prefix: "Fullstack developer with 3+ years of experience, engineering at the intersection of",
       highlight1: "Biological Systems",
       and: "and",
       highlight2: "Computational Intelligence",
@@ -83,7 +83,7 @@ export const homeData = {
   },
   projects: {
     title: "Projects",
-    items: allProjects.map((p) => ({
+    items: projects.map((p) => ({
       id: p.id,
       link: `/projects/${p.id}`,
       focus: p.focus,

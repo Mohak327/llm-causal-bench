@@ -1,7 +1,7 @@
 import { Theme } from "../../Theme";
 import { ProjectInterface } from "./projects.interface";
 
-const projects: ProjectInterface[] = [
+export const projects: ProjectInterface[] = [
   {
     id: "computational-cardiac-modeling",
     title: "Computational Cardiac Modeling",
@@ -359,8 +359,6 @@ const projects: ProjectInterface[] = [
   },
 ];
 
-export const allProjects = projects;
-
-export const getProjectById = (id: string): ProjectInterface | undefined => {
-  return projects.find((p) => p.id === id);
-};
+// export const getProjectById = (id: string): ProjectInterface | undefined => {
+//   return projects.find((p) => p.id === id);
+// };
