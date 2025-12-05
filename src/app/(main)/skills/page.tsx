@@ -1,5 +1,5 @@
-import SkillsController from "@/pages/SkillsPage/SkillsPage.controller";
+import SkillsPageController from "@/page-vc/SkillsPage/SkillsPage.controller";
 
 export default function Page() {
-  return <SkillsController />;
+  return <SkillsPageController />;
 }

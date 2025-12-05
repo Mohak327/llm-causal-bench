@@ -1,10 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
-import { skillCategories } from "@/data/skills/skills.model";
+import { skillCategories } from "@/page-data/skills/skills.model";
 import { FilterOption } from "@/components/Organisms/PillFilters/PillFilters.interface";
 import SkillsPageView from "./SkillsPage.view";
 
-const Skills = () => {
+const SkillsPageController = () => {
   const allLabel = "All";
   const [activeTab, setActiveTab] = useState<string>(allLabel);
 
@@ -49,4 +49,4 @@ const Skills = () => {
   );
 };
 
-export default Skills;
+export default SkillsPageController;

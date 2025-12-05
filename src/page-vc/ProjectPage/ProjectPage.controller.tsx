@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
-import { projects } from "@/data/projects/projects.model";
+import { projects } from "@/page-data/projects/projects.model";
 import ProjectDetailView from "./ProjectPage.view";
-import { ProjectInterface } from "@/data/projects/projects.interface";
+import { ProjectInterface } from "@/page-data/projects/projects.interface";
 
 interface ProjectDetailControllerProps {
   id: string;

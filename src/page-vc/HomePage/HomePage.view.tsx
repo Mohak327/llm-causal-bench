@@ -1,5 +1,5 @@
 "use client";
-import { homeData } from "../../data/home/home.model";
+import { homeData } from "../../page-data/home/home.model";
 import HeroSection from "../../components/Organisms/HeroSection/HeroSection.view";
 import TitledTagCloud from "../../components/Organisms/TitledTagCloud/TitledTagCloud.view";
 import TitledCardList from "../../components/Organisms/TitledCardList/TitledCardList.view";
@@ -7,10 +7,10 @@ import TitledContentBox from "../../components/Organisms/TitledContentBox/Titled
 import SiteFooter from "../../components/Organisms/SiteFooter/SiteFooter.view";
 import { Brain } from "lucide-react";
 import Marquee from "../../components/Molecules/Marquee/Marquee.view";
-import { HomeViewProps } from "../../data/home/home.interface";
+import { HomeViewProps } from "../../page-data/home/home.interface";
 import RichTextController from "@/components/Organisms/RichText/RichText.controller";
 
-const HomeView = ({ techArsenal }: HomeViewProps) => {
+const HomePageView = ({ techArsenal }: HomeViewProps) => {
   return (
     <div
       className={`min-h-screen text-black font-mono selection:bg-black selection:text-white overflow-x-hidden`}
@@ -106,7 +106,7 @@ const HomeView = ({ techArsenal }: HomeViewProps) => {
           beyondTheCode={homeData.footer.beyondTheCode}
           contact={{
             ...homeData.footer.contact,
-            links: homeData.footer.contact.links.map(link => ({
+            links: homeData.footer.contact.links.map((link) => ({
               ...link,
               icon: link.icon ? <link.icon /> : undefined,
             })),
@@ -129,4 +129,4 @@ const HomeView = ({ techArsenal }: HomeViewProps) => {
   );
 };
 
-export default HomeView;
+export default HomePageView;

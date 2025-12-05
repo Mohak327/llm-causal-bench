@@ -1,6 +1,6 @@
 import React from "react";
 import PillFilters from "@/components/Organisms/PillFilters/PillFilters.controller";
-import { SkillsPageViewProps } from "../../data/skills/skills.interface";
+import { SkillsPageViewProps } from "../../page-data/skills/skills.interface";
 
 export const SkillsPageView: React.FC<SkillsPageViewProps> = ({
   filterOptions,

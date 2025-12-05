@@ -1,8 +1,8 @@
 "use client";
-import { homeData } from "@/data/home/home.model";
-import HomeView from "./HomePage.view";
-import { skillCategories } from "@/data/skills/skills.model";
-import { SkillCategoryProps } from "../../data/home/home.interface";
+import { homeData } from "@/page-data/home/home.model";
+import HomePageView from "./HomePage.view";
+import { skillCategories } from "@/page-data/skills/skills.model";
+import { SkillCategoryProps } from "../../page-data/home/home.interface";
 
 const getTechArsenal = (categories: SkillCategoryProps[]) => {
   const skills: string[] = [];
@@ -25,9 +25,9 @@ const getTechArsenal = (categories: SkillCategoryProps[]) => {
   };
 };
 
-const HomeController = () => {
+const HomePageController = () => {
   const techArsenal = getTechArsenal(skillCategories);
-  return <HomeView techArsenal={techArsenal} />;
+  return <HomePageView techArsenal={techArsenal} />;
 };
 
-export default HomeController;
+export default HomePageController;
