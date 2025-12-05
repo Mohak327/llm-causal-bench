@@ -1,6 +1,6 @@
 import React from "react";
 import { ContentRendererProps } from "./ContentRenderer.interface";
-import RichTextController from "../RichTextList/RichTextList.controller";
+import RichTextController from "../RichText/RichText.controller";
 
 const ContentRenderer: React.FC<ContentRendererProps> = ({ sections }) => {
   return (

@@ -1,8 +1,8 @@
 import React, { ReactElement } from "react";
-import RichTextView from "./RichTextList.view";
-import { RichTextProps } from "./RichTextList.interface";
-import { Node, ElementNode } from "./RichTextList.interface";
-import { OPEN_TAGS } from "./RichTextList.model";
+import RichTextView from "./RichText.view";
+import { RichTextProps } from "./RichText.interface";
+import { Node, ElementNode } from "./RichText.interface";
+import { OPEN_TAGS } from "./RichText.model";
 
 const parseToNodes = (text: string): Node[] => {
   const root: ElementNode = { type: "root", children: [] };
