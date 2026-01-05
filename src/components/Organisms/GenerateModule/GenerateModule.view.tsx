@@ -2,6 +2,7 @@ import { AlertCircle, Copy, Sparkles, FileJson } from "lucide-react";
 import { AVAILABLE_MODELS } from "./GenerateModule.model";
 import ReactMarkdown from "react-markdown";
 import { ENV_CONFIG } from "@/config/env.config";
+import { SCMGraph } from "@/components/Molecules/SCMGraph/SCMGraph";
 import { GenerateModuleViewProps } from "./GenerateModule.types";
 
 export const GenerateModuleView = ({
@@ -171,29 +172,44 @@ export const GenerateModuleView = ({
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="bg-slate-900 rounded p-3">
-                  <div className="text-xs text-slate-400 mb-2">Nodes</div>
-                  <div className="space-y-1">
-                    {Object.entries(scm.G.nodes).map(([key, val]) => (
-                      <div key={key} className="text-sm text-white">
-                        <span className="font-bold text-purple-400">
-                          {key}:
-                        </span>{" "}
-                        {String(val)}
-                      </div>
-                    ))}
+              <div className="mt-4 flex flex-col lg:flex-row gap-4">
+                {/* Left side - Nodes and Edges stacked vertically */}
+                <div className="w-full lg:w-1/2 space-y-4">
+                  <div className="bg-slate-900 rounded p-4">
+                    <div className="text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wide">
+                      Nodes
+                    </div>
+                    <div className="space-y-2">
+                      {Object.entries(scm.G.nodes).map(([key, val]) => (
+                        <div key={key} className="text-sm text-white">
+                          <span className="font-bold text-purple-400">
+                            {key}:
+                          </span>{" "}
+                          {String(val)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-slate-900 rounded p-4">
+                    <div className="text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wide">
+                      Edges
+                    </div>
+                    <div className="space-y-2">
+                      {scm.G.edges.map((edge: string[], i: number) => (
+                        <div key={i} className="text-sm text-white">
+                          {edge[0]} → {edge[1]}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="bg-slate-900 rounded p-3">
-                  <div className="text-xs text-slate-400 mb-2">Edges</div>
-                  <div className="space-y-1">
-                    {scm.G.edges.map((edge: string[], i: number) => (
-                      <div key={i} className="text-sm text-white">
-                        {edge[0]} → {edge[1]}
-                      </div>
-                    ))}
+
+                {/* Right side - Graph Visualization */}
+                <div className="w-full lg:w-1/2">
+                  <div className="text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wide">
+                    Causal Graph Visualization
                   </div>
+                  <SCMGraph nodes={scm.G.nodes} edges={scm.G.edges} />
                 </div>
               </div>
             </div>
