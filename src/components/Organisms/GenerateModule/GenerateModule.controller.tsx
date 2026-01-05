@@ -44,7 +44,7 @@ export const GenerateModule = () => {
         generatedBy: data.generatedBy,
       };
 
-      setGeneratedSCMs([generated, ...generatedSCMs]);
+      setGeneratedSCMs([generated]);
     } catch (err: any) {
       setError(err.message || "Failed to generate SCM");
       console.error("Generation error:", err);

@@ -52,6 +52,7 @@ export const SCMGraph = ({ nodes, edges }: SCMGraphProps) => {
           padding: "12px",
           width: "auto",
           minWidth: "140px",
+          zIndex: 10,
         },
       };
     });
@@ -73,6 +74,7 @@ export const SCMGraph = ({ nodes, edges }: SCMGraphProps) => {
         stroke: "rgb(168, 85, 247)",
         strokeWidth: 2,
       },
+      zIndex: 0,
     }));
   }, [edges]);
 
