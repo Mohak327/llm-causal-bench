@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import './globals.css';
-import EnergyFieldController from '@/components/Organisms/EnergyFieldBackground/EnergyField.controller';
 
 export default function NotFound() {
   return (

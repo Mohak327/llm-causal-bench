@@ -1,5 +1,5 @@
 {
-  "name": "moksh-portfolio",
+  "name": "causal-bench",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "lucide-react": "^0.554.0",
     "next": "^16.0.3",
     "react": "^19.2.0",
