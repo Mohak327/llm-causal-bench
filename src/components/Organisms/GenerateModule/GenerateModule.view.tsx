@@ -1,77 +1,46 @@
-"use client";
-import React, { useState } from 'react';
-import { AlertCircle, Copy, Sparkles, FileJson } from 'lucide-react';
+import { AlertCircle, Copy, Sparkles, FileJson } from "lucide-react";
+import { AVAILABLE_MODELS } from "./GenerateModule.model";
+import ReactMarkdown from "react-markdown";
+import { ENV_CONFIG } from "@/config/env.config";
+import { GenerateModuleViewProps } from "./GenerateModule.types";
 
-export const GenerateModule = () => {
-  const [prompt, setPrompt] = useState('');
-  const [generating, setGenerating] = useState(false);
-  const [generatedSCMs, setGeneratedSCMs] = useState<any[]>([]);
-  const [selectedModel, setSelectedModel] = useState('claude');
-  const [error, setError] = useState('');
-
-  const generateSCMs = async () => {
-    setGenerating(true);
-    setError('');
-    
-    try {
-      const response = await fetch('/api/generate-scm', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt,
-          model: selectedModel
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || `API Error: ${response.status}`);
-      }
-      
-      const generated = {
-        id: Date.now(),
-        ...data.scmData,
-        timestamp: new Date().toISOString(),
-        generatedBy: data.generatedBy
-      };
-      
-      setGeneratedSCMs([generated, ...generatedSCMs]);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate SCM');
-      console.error('Generation error:', err);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const copyToClipboard = (data: any) => {
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-  };
-
+export const GenerateModuleView = ({
+  prompt,
+  setPrompt,
+  generating,
+  generatedSCMs,
+  selectedModel,
+  setSelectedModel,
+  error,
+  generateSCMs,
+  copyToClipboard,
+  loadDummyData,
+}: GenerateModuleViewProps) => {
   return (
     <div className="space-y-6">
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="w-6 h-6 text-purple-400" />
-          <h2 className="text-2xl font-bold text-white">Generate SCM Benchmarks</h2>
+          <h2 className="text-2xl font-bold text-white">
+            Generate SCM Benchmarks
+          </h2>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Foundation Model
             </label>
-            <select 
+            <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
-              <option value="claude">Claude Sonnet 4.5</option>
-              <option value="gpt4">GPT-4</option>
-              <option value="gemini">Gemini Pro</option>
+              {AVAILABLE_MODELS.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -104,7 +73,17 @@ export const GenerateModule = () => {
               </>
             )}
           </button>
-          
+
+          {ENV_CONFIG.SHOW_DEBUG_FEATURES && (
+            <button
+              onClick={loadDummyData}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <FileJson className="w-5 h-5" />
+              Load Dummy SCMs (Testing)
+            </button>
+          )}
+
           {error && (
             <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
@@ -120,22 +99,68 @@ export const GenerateModule = () => {
             <FileJson className="w-5 h-5 text-purple-400" />
             Generated SCMs ({generatedSCMs.length})
           </h3>
-          
+
           {generatedSCMs.map((scm) => (
-            <div key={scm.id} className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+            <div
+              key={scm.id}
+              className="bg-slate-800 rounded-lg p-6 border border-slate-700"
+            >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
                   <div className="text-sm text-slate-400 mb-2">
-                    Generated: {new Date(scm.timestamp).toLocaleString()} • Model: {scm.generatedBy || 'claude'}
+                    Generated: {new Date(scm.timestamp).toLocaleString()} •
+                    Model: {scm.generatedBy || "claude"}
                   </div>
-                  <div className="text-white font-mono text-sm bg-slate-900 rounded p-3 mb-3">
-                    <div className="text-slate-400 mb-1">Text (T):</div>
-                    {scm.T}
+                  <div className="bg-slate-900 rounded p-4 mb-3">
+                    <div className="text-slate-400 mb-2 font-semibold text-xs uppercase tracking-wide">Text (T):</div>
+                    <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-strong:font-bold prose-li:text-slate-200">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                          strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                          ol: ({ children }) => <ol className="list-decimal list-outside ml-5 space-y-2 my-3">{children}</ol>,
+                          ul: ({ children }) => <ul className="list-disc list-outside ml-5 space-y-2 my-3">{children}</ul>,
+                          li: ({ children }) => <li className="text-slate-200 leading-relaxed">{children}</li>,
+                        }}
+                      >
+                        {scm.T}
+                      </ReactMarkdown>
+                    </div>
                   </div>
-                  <div className="text-white font-mono text-sm bg-slate-900 rounded p-3">
-                    <div className="text-slate-400 mb-1">Query (Q):</div>
-                    {scm.Q}
+                  <div className="bg-slate-900 rounded p-4 mb-3">
+                    <div className="text-slate-400 mb-2 font-semibold text-xs uppercase tracking-wide">Query (Q):</div>
+                    <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-strong:font-bold prose-li:text-slate-200">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                          strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                          ol: ({ children }) => <ol className="list-decimal list-outside ml-5 space-y-2 my-3">{children}</ol>,
+                          ul: ({ children }) => <ul className="list-disc list-outside ml-5 space-y-2 my-3">{children}</ul>,
+                          li: ({ children }) => <li className="text-slate-200 leading-relaxed">{children}</li>,
+                        }}
+                      >
+                        {scm.Q}
+                      </ReactMarkdown>
+                    </div>
                   </div>
+                  {scm.S && (
+                    <div className="bg-slate-900 rounded p-4">
+                      <div className="text-slate-400 mb-2 font-semibold text-xs uppercase tracking-wide">Solution (S):</div>
+                      <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-strong:font-bold prose-li:text-slate-200">
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                            strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                            ol: ({ children }) => <ol className="list-decimal list-outside ml-5 space-y-2 my-3">{children}</ol>,
+                            ul: ({ children }) => <ul className="list-disc list-outside ml-5 space-y-2 my-3">{children}</ul>,
+                            li: ({ children }) => <li className="text-slate-200 leading-relaxed">{children}</li>,
+                          }}
+                        >
+                          {scm.S}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={() => copyToClipboard(scm)}
@@ -145,14 +170,17 @@ export const GenerateModule = () => {
                   <Copy className="w-4 h-4 text-slate-300" />
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div className="bg-slate-900 rounded p-3">
                   <div className="text-xs text-slate-400 mb-2">Nodes</div>
                   <div className="space-y-1">
                     {Object.entries(scm.G.nodes).map(([key, val]) => (
                       <div key={key} className="text-sm text-white">
-                        <span className="font-bold text-purple-400">{key}:</span> {String(val)}
+                        <span className="font-bold text-purple-400">
+                          {key}:
+                        </span>{" "}
+                        {String(val)}
                       </div>
                     ))}
                   </div>

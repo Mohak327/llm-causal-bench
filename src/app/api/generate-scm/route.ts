@@ -51,7 +51,7 @@ Return ONLY the JSON object, no markdown, no explanation.`;
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt }
       ],
-      2000
+      4000 // Increased token limit to handle complex SCMs with detailed narratives
     );
 
     const responseText = response.text;

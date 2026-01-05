@@ -1,5 +1,3 @@
-"use client";
-import React, { useState } from "react";
 import {
   AlertCircle,
   CheckCircle,
@@ -7,98 +5,23 @@ import {
   TestTube,
   BarChart3,
 } from "lucide-react";
-import { AnalysisService } from "@/services/analysis/AnalysisService";
+import { ERROR_TYPES, AVAILABLE_MODELS } from "./TestModule.model";
+import { TestModuleViewProps } from "./TestModule.types";
+import ReactMarkdown from "react-markdown";
+import { ENV_CONFIG } from "@/config/env.config";
 
-// Error type definitions
-const ERROR_TYPES = [
-  { code: 0, name: "No Error", color: "text-emerald-400" },
-  { code: 1, name: "Not Changing Downstream Variables", color: "text-red-400" },
-  { code: 2, name: "Changing Upstream Variables", color: "text-orange-400" },
-  { code: 3, name: "Correlation Effect", color: "text-yellow-400" },
-];
-
-// Sample data structure
-const SAMPLE_SCM = {
-  G: {
-    nodes: { A: "Rainfall", B: "Soil_Moisture", C: "Crop_Yield" },
-    edges: [
-      ["A", "B"],
-      ["B", "C"],
-    ],
-  },
-  T: "Heavy rainfall saturated the soil, leading to abundant crop yield.",
-  V: ["A"],
-  Q: "What if there was a drought instead?",
-  M: "P(T_{A=drought} | T=t)",
-  S: "A drought depleted soil moisture, causing crop failure.",
-};
-
-export const TestModule = () => {
-  const [textInput, setTextInput] = useState("");
-  const [queryInput, setQueryInput] = useState("");
-  const [selectedModels, setSelectedModels] = useState([
-    "claude",
-    "gpt4",
-    "gemini",
-  ]);
-  const [testing, setTesting] = useState(false);
-  const [results, setResults] = useState<any>(null);
-
-  const availableModels = [
-    { id: "claude", name: "Claude Sonnet 4.5", color: "bg-orange-500" },
-    { id: "gpt4", name: "GPT-4", color: "bg-green-500" },
-    { id: "gemini", name: "Gemini Pro", color: "bg-blue-500" },
-    { id: "llama", name: "Llama 3", color: "bg-purple-500" },
-  ];
-
-  const toggleModel = (modelId: string) => {
-    setSelectedModels((prev) =>
-      prev.includes(modelId)
-        ? prev.filter((m) => m !== modelId)
-        : [...prev, modelId]
-    );
-  };
-
-  const runTest = async () => {
-    setTesting(true);
-
-    try {
-      const response = await fetch("/api/test-models", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: textInput,
-          query: queryInput,
-          models: selectedModels,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to run tests");
-      }
-
-      // Analyze each response using AI-powered evaluation for accuracy
-      const analyzedResponses = await AnalysisService.analyzeBatch(
-        SAMPLE_SCM,
-        data.responses,
-        true // Always use AI evaluation for benchmarking accuracy
-      );
-
-      setResults({
-        scm: SAMPLE_SCM,
-        responses: analyzedResponses,
-      });
-    } catch (error) {
-      console.error("Error running tests:", error);
-    } finally {
-      setTesting(false);
-    }
-  };
-
+export const TestModuleView = ({
+  textInput,
+  setTextInput,
+  queryInput,
+  setQueryInput,
+  selectedModels,
+  toggleModel,
+  testing,
+  results,
+  runTest,
+  loadDummyData,
+}: TestModuleViewProps) => {
   return (
     <div className="space-y-6">
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
@@ -137,7 +60,7 @@ export const TestModule = () => {
               Select Models to Test
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {availableModels.map((model) => (
+              {AVAILABLE_MODELS.map((model) => (
                 <button
                   key={model.id}
                   onClick={() => toggleModel(model.id)}
@@ -181,6 +104,16 @@ export const TestModule = () => {
               </>
             )}
           </button>
+
+          {ENV_CONFIG.SHOW_DEBUG_FEATURES && (
+            <button
+              onClick={loadDummyData}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <TestTube className="w-5 h-5" />
+              Load Dummy Response (Testing)
+            </button>
+          )}
         </div>
       </div>
 
@@ -249,7 +182,7 @@ export const TestModule = () => {
 
             <div className="space-y-4">
               {results.responses.map((result: any, idx: number) => {
-                const model = availableModels.find(
+                const model = AVAILABLE_MODELS.find(
                   (m) => m.id === result.model
                 ) || {
                   id: result.model,
@@ -296,12 +229,22 @@ export const TestModule = () => {
                       </div>
                     </div>
 
-                    <div className="bg-slate-950 rounded p-3 mb-3">
-                      <div className="text-xs text-slate-400 mb-1">
+                    <div className="bg-slate-950 rounded p-4 mb-3">
+                      <div className="text-xs text-slate-400 mb-2 uppercase tracking-wide font-semibold">
                         Response:
                       </div>
-                      <div className="text-sm text-white">
-                        {result.response}
+                      <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-strong:font-bold prose-li:text-slate-200">
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-2 leading-relaxed text-sm">{children}</p>,
+                            strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                            ol: ({ children }) => <ol className="list-decimal list-outside ml-5 space-y-2 my-3">{children}</ol>,
+                            ul: ({ children }) => <ul className="list-disc list-outside ml-5 space-y-2 my-3">{children}</ul>,
+                            li: ({ children }) => <li className="text-slate-200 leading-relaxed text-sm">{children}</li>,
+                          }}
+                        >
+                          {result.response}
+                        </ReactMarkdown>
                       </div>
                     </div>
 

@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from 'react';
 import { Sparkles, TestTube, BarChart3 } from 'lucide-react';
-import { GenerateModule } from '@/components/Organisms/GenerateModule/GenerateModule.view';
-import { TestModule } from '@/components/Organisms/TestModule/TestModule.view';
+import { GenerateModule } from '@/components/Organisms/GenerateModule/GenerateModule.controller';
+import { TestModule } from '@/components/Organisms/TestModule/TestModule.controller';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('test');
