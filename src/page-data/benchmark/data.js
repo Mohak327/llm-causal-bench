@@ -12,10 +12,6 @@
 
 // Type III: Correlation Effect. Changing irrelevant variables due to the occurrence of certain phrases, say certain names co-occurring in certain situations.
 
-// uv -> ozone depletion, chemicals from factories -> ozone depletion, ozone depletion -> increased exposure radiation, increased exposure radiation -> skin cancer -> chemicals from factories -> skin cancer
-// star trek warp drive
-// yogi fasting
-
 const errorTypes = [
   { code: 0, description: "No Error" },
   { code: 1, description: "Not changing Downstream Variables" },
