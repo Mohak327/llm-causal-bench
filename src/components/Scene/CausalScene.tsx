@@ -84,12 +84,32 @@ const EDGES: EdgeDef[] = [
 // First pour: the cup sweeps its lip from SWEEP_FROM to SWEEP_TO along x,
 // filling each variable as the stream passes over it.
 const SWEEP_START = 0.42;
-const SWEEP_END = 1.0;
+const SWEEP_END = 1.75;
 const SWEEP_FROM = -3.9;
-const SWEEP_TO = 3.9;
 const POUR_TILT = 1.62;
 const sweepOf = (s: number) => ramp(s, SWEEP_START, SWEEP_END);
-const sweepAt = (x: number) => (x - SWEEP_FROM) / (SWEEP_TO - SWEEP_FROM);
+
+// The pour is split into one stretch of scroll per variable: the cup glides
+// over (first quarter), tips and dwells while the variable fills, then tips
+// back just before moving on. Dwelling is what gives falling tea time to land.
+const pourPlan = (s: number) => {
+  const u = sweepOf(s) * NODES.length;
+  const k = Math.min(NODES.length - 1, Math.floor(u));
+  const f = u - k;
+  const glide = smooth(ramp(f, 0, 0.25));
+  const to = NODES[k].chain;
+  const from = k === 0 ? [SWEEP_FROM, to[1], to[2]] : NODES[k - 1].chain;
+  const tip = smooth(ramp(f, 0.2, 0.3)) * (1 - smooth(ramp(f, 0.9, 1.0)));
+  // Where the tea should land: the top of the variable being filled.
+  const aim = new THREE.Vector3(
+    THREE.MathUtils.lerp(from[0], to[0], glide),
+    THREE.MathUtils.lerp(from[1], to[1], glide) + NODES[k].radius * 0.4,
+    THREE.MathUtils.lerp(from[2], to[2], glide)
+  );
+  return { u, lipX: aim.x, tip, aim };
+};
+// How far variable `i` has filled, 0 to 1.
+const fillOf = (s: number, i: number) => ramp(sweepOf(s) * NODES.length - i, 0.32, 0.92);
 
 // Rim point the tea leaves from and the cavity floor, in the cup's tilt frame.
 const LIP = new THREE.Vector3(1.0, 0.52, 0);
@@ -313,6 +333,9 @@ function Cup({
       e: new THREE.Euler(),
       one: new THREE.Vector3(1, 1, 1),
       zAxis: new THREE.Vector3(0, 0, 1),
+      aim: new THREE.Vector3(),
+      aimLip: new THREE.Vector3(),
+      aimDir: new THREE.Vector3(),
     }),
     []
   );
@@ -331,23 +354,21 @@ function Cup({
     let lean: number;
     let volume: number;
     let pouring: number;
+    let aim: THREE.Vector3;
+    let aimWeight: number;
 
     if (s < 2) {
       const approach = smooth(ramp(s, 0.05, SWEEP_START));
-      const exit = smooth(ramp(s, 1.05, 1.35));
-      const sweep = sweepOf(s);
-      const lipX = THREE.MathUtils.lerp(SWEEP_FROM, SWEEP_TO, sweep);
+      const exit = smooth(ramp(s, SWEEP_END + 0.03, 1.98));
+      const plan = pourPlan(s);
+      const { lipX, tip } = plan;
+      aim = plan.aim;
+      aimWeight = approach;
 
-      // Tip fully only while the lip is over a variable, like filling four
-      // cups in a row; between them the cup eases back and the flow stops.
-      let over = 0;
-      for (const n of NODES) {
-        over = Math.max(over, 1 - smooth(ramp(Math.abs(lipX - n.chain[0]), 0.22, 0.6)));
-      }
       tiltAngle =
         smooth(ramp(s, 0.22, SWEEP_START)) *
-        THREE.MathUtils.lerp(1.0, POUR_TILT, over) *
-        (1 - smooth(ramp(s, 1.0, 1.15)));
+        THREE.MathUtils.lerp(1.0, POUR_TILT, tip) *
+        (1 - smooth(ramp(s, SWEEP_END, SWEEP_END + 0.08)));
       lean = THREE.MathUtils.lerp(0.5, 0.2, approach);
       scale = THREE.MathUtils.lerp(1.45, 0.8, approach) * (1 - exit);
 
@@ -357,7 +378,9 @@ function Cup({
         THREE.MathUtils.lerp(HERO_CUP.y, POUR_HEIGHT, approach) + exit * 1.6,
         0
       );
-      volume = 1 - 0.85 * smooth(sweep) - 0.15 * smooth(ramp(s, SWEEP_END, 1.12));
+      let poured = 0;
+      for (let i = 0; i < NODES.length; i++) poured += fillOf(s, i);
+      volume = 1 - 0.85 * (poured / NODES.length) - 0.15 * smooth(ramp(s, SWEEP_END, SWEEP_END + 0.08));
       pouring = smooth(ramp(s, 0.2, SWEEP_START));
     } else {
       const enter = smooth(ramp(s, 2.45, 2.8));
@@ -374,12 +397,35 @@ function Cup({
       );
       volume = 1 - smooth(ramp(s, 2.95, 3.5));
       pouring = 1;
+      const rain = NODES[1];
+      aim = tmp.aim.set(rain.chain[0], rain.chain[1] + rain.radius * 0.4, rain.chain[2]);
+      aimWeight = 1;
     }
 
     o.visible = scale > 0.002;
     o.scale.setScalar(Math.max(scale, 0.0001));
     o.rotation.set(lean, 0, 0);
     tg.rotation.set(0, 0, -tiltAngle);
+
+    // Aim where the tea lands, not where the lip is: at the full pouring
+    // pose, follow the ballistic path down to the target's height and slide
+    // the cup so that landing point sits on the target.
+    if (aimWeight > 0) {
+      o.updateMatrix();
+      tmp.m.makeRotationZ(-POUR_TILT);
+      tmp.aimLip.copy(LIP).applyMatrix4(tmp.m).applyMatrix4(o.matrix);
+      tmp.aimDir
+        .set(1, -0.35, 0)
+        .normalize()
+        .applyAxisAngle(tmp.zAxis, -POUR_TILT)
+        .applyEuler(tmp.e.set(lean, 0, 0))
+        .multiplyScalar(EXIT_SPEED);
+      const drop = Math.max(tmp.aimLip.y - aim.y, 0);
+      const vy = tmp.aimDir.y;
+      const tFall = (vy + Math.sqrt(vy * vy + 2 * GRAVITY * drop)) / GRAVITY;
+      o.position.x += (aim.x - (tmp.aimLip.x + tmp.aimDir.x * tFall)) * aimWeight;
+      o.position.z += (aim.z - (tmp.aimLip.z + tmp.aimDir.z * tFall)) * aimWeight;
+    }
 
     // Idle turn plus a scroll twist; both unwind so the handle faces away from
     // the lip by the time the tea pours.
@@ -902,23 +948,24 @@ function Blob({
     if (!g || !material.current || !body) return;
 
     // The variable swells from the tea landing on it as the stream passes.
-    const at = sweepAt(def.chain[0]);
-    const sweep = sweepOf(s);
-    const grow = s > SWEEP_END + 0.05 ? 1 : smooth(ramp(sweep, at - 0.05, at + 0.05));
+    // A small puddle appears as the stream reaches this spot, then swells.
+    const segment = sweepOf(s) * NODES.length - index;
+    const started = s > SWEEP_END || segment > 0.3;
+    const grow = s > SWEEP_END ? 1 : started ? 0.18 + 0.82 * smooth(fillOf(s, index)) : 0;
 
     g.position.copy(chain);
     if (!reduced) g.position.y += Math.sin(t * 0.7 + index * 1.9) * 0.05 * grow;
-    g.visible = grow > 0.001;
+    g.visible = started;
     const r = def.radius * grow;
     g.scale.setScalar(Math.max(r, 0.0001));
     body.pos.copy(g.position);
-    // Catch the first drops while the pool is still tiny.
-    body.r = grow > 0.001 ? def.radius * Math.max(grow, 0.45) : 0;
+    // Catch the stream a little above the puddle so it never falls through.
+    body.r = started ? def.radius * Math.max(grow, 0.45) : 0;
     body.impulse *= Math.exp(-delta * 3);
 
     // The poured tea cools to cobalt once the whole pour is done;
     // intervention re-steeps it later.
-    const cooling = 1 - smooth(ramp(s, SWEEP_END, SWEEP_END + 0.25));
+    const cooling = 1 - smooth(ramp(s, SWEEP_END, SWEEP_END + 0.2));
     const tint = Math.max(cooling, def.tint(s));
     steep(material.current.color, COBALT, tint);
     // Past ~0.45 the distorted normals start rendering dark rims.
@@ -942,7 +989,7 @@ function Blob({
       const x = ((anchor.x + 1) / 2) * state.size.width;
       const y = ((1 - anchor.y) / 2) * state.size.height;
       label.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-      label.style.opacity = String(ramp(s, 1.05, 1.35));
+      label.style.opacity = String(ramp(s, SWEEP_END, SWEEP_END + 0.2));
     }
   });
 
@@ -996,7 +1043,7 @@ function Edge({
 
   useFrame((state) => {
     const s = stage.get();
-    const appear = smooth(ramp(s, 1.0, 1.35));
+    const appear = smooth(ramp(s, SWEEP_END, SWEEP_END + 0.2));
     const cut = def.cut(s);
     const tint = def.tint(s);
 
@@ -1153,7 +1200,7 @@ export default function CausalScene({
             ref={(el) => {
               labels.current[i] = el;
             }}
-            className="absolute left-0 top-0 whitespace-nowrap rounded-full bg-white/85 px-3 py-1 text-[13px] font-semibold text-ink shadow-sm"
+            className="absolute left-0 top-0 whitespace-nowrap rounded-full bg-white/85 px-3.5 py-1.5 text-[15px] font-semibold text-ink shadow-sm"
             style={{ opacity: 0 }}
           >
             {def.label(step)}

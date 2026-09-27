@@ -27,7 +27,7 @@ export const Lab = forwardRef<HTMLElement, { reduced: boolean }>(
               <h2 className="text-[clamp(3rem,8vw,6.5rem)] font-bold leading-[0.9] tracking-[-0.04em] [font-variation-settings:'wdth'_82]">
                 The lab
               </h2>
-              <p className="mt-5 font-serif text-xl leading-8 text-ink-soft">
+              <p className="mt-5 font-serif text-[1.45rem] leading-[2.3rem] text-ink-soft">
                 Put a what-if question to several models at once and see who
                 follows the ripple, or have a model write fresh benchmark
                 scenarios for you.
@@ -47,7 +47,7 @@ export const Lab = forwardRef<HTMLElement, { reduced: boolean }>(
                   aria-selected={tab === t.id}
                   aria-controls={`panel-${t.id}`}
                   onClick={() => setTab(t.id)}
-                  className={`relative flex-1 whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-colors sm:flex-none ${
+                  className={`relative flex-1 whitespace-nowrap rounded-full px-6 py-3 text-base font-semibold transition-colors sm:flex-none ${
                     tab === t.id ? "text-porcelain" : "text-ink-soft hover:text-cobalt"
                   }`}
                 >
@@ -86,7 +86,7 @@ export const Lab = forwardRef<HTMLElement, { reduced: boolean }>(
           </div>
         </div>
 
-        <footer className="mx-auto mt-32 flex max-w-6xl flex-col gap-3 border-t border-glaze pt-8 text-sm text-ink-faint sm:flex-row sm:justify-between">
+        <footer className="mx-auto mt-32 flex max-w-6xl flex-col gap-3 border-t border-glaze pt-8 text-base text-ink-faint sm:flex-row sm:justify-between">
           <p>Causalitea, an open benchmark for counterfactual reasoning in language models.</p>
           <a
             href="https://github.com/Mohak327/llm-causal-bench"

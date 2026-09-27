@@ -41,7 +41,7 @@ const STEPS: Step[] = [
           The change must never flow backwards: it was still spring. Each answer
           is checked against the true outcome for three kinds of mistake.
         </p>
-        <dl className="mt-5 space-y-3 font-display text-base leading-6">
+        <dl className="mt-5 space-y-3 font-display text-lg leading-7">
           <div>
             <dt className="font-semibold text-ink">Missed the ripple</dt>
             <dd className="text-ink-soft">Downstream effects left unchanged. Type I.</dd>
@@ -78,7 +78,7 @@ export const Story = forwardRef<
       aria-label="How the benchmark works"
     >
       <div className="sticky top-0 flex h-[100svh] items-end px-5 pb-8 sm:px-10 lg:items-center lg:pb-0">
-        <div className="relative w-full max-w-[34rem] rounded-[2rem] bg-porcelain/85 p-6 backdrop-blur-md sm:p-8 lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
+        <div className="relative w-full max-w-[38rem] rounded-[2rem] bg-porcelain/85 p-6 backdrop-blur-md sm:p-8 lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
           <ol className="mb-8 flex items-center gap-2" aria-label="Steps">
             {STEPS.map((s, i) => (
               <li key={s.title} className="flex items-center gap-2">
@@ -112,10 +112,10 @@ export const Story = forwardRef<
               <h2 className="text-[clamp(2.4rem,5vw,4.2rem)] font-bold leading-[0.95] tracking-[-0.03em] [font-variation-settings:'wdth'_85]">
                 {current.title}
               </h2>
-              <div className="mt-5 font-serif text-lg leading-8 text-ink-soft sm:text-xl sm:leading-9">
+              <div className="mt-5 font-serif text-xl leading-9 text-ink-soft sm:text-[1.45rem] sm:leading-[2.4rem]">
                 {current.body}
               </div>
-              <p className="mt-6 inline-block rounded-full border border-glaze bg-white/60 px-4 py-1.5 font-serif text-lg italic text-cobalt">
+              <p className="mt-6 inline-block rounded-full border border-glaze bg-white/60 px-5 py-2 font-serif text-xl italic text-cobalt">
                 {current.notation}
               </p>
               {index === STEPS.length - 1 && (

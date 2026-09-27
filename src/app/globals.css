@@ -30,19 +30,19 @@
 
 @layer components {
   .field {
-    @apply w-full rounded-2xl border border-glaze bg-white/70 px-5 py-4 font-serif text-lg leading-relaxed text-ink shadow-[inset_0_1px_2px_rgba(19,26,46,0.06)] outline-none transition-colors placeholder:text-ink-faint focus:border-cobalt focus:bg-white;
+    @apply w-full rounded-2xl border border-glaze bg-white/70 px-5 py-4 font-serif text-xl leading-relaxed text-ink shadow-[inset_0_1px_2px_rgba(19,26,46,0.06)] outline-none transition-colors placeholder:text-ink-faint focus:border-cobalt focus:bg-white;
   }
 
   .field-label {
-    @apply mb-2 block text-sm font-semibold text-ink-soft;
+    @apply mb-2 block text-base font-semibold text-ink-soft;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-cobalt px-7 py-3.5 font-semibold text-porcelain transition-[background-color,transform] hover:bg-ink active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-glaze disabled:text-ink-faint;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-cobalt px-8 py-4 text-lg font-semibold text-porcelain transition-[background-color,transform] hover:bg-ink active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-glaze disabled:text-ink-faint;
   }
 
   .btn-quiet {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-glaze bg-white/60 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-cobalt hover:text-cobalt;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-glaze bg-white/60 px-5 py-2.5 text-base font-semibold text-ink-soft transition-colors hover:border-cobalt hover:text-cobalt;
   }
 }
 

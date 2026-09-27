@@ -49,11 +49,11 @@ export const Hero = ({
         style={{ opacity: fade }}
         suppressHydrationWarning
       >
-        <a href="#top" className="flex items-center gap-2 text-lg font-bold tracking-[-0.02em]">
-          <LogoMark className="h-9 w-9" />
+        <a href="#top" className="flex items-center gap-2.5 text-xl font-bold tracking-[-0.02em]">
+          <LogoMark className="h-10 w-10" />
           Causalitea
         </a>
-        <div className="flex items-center gap-1 text-sm font-semibold text-ink-soft sm:gap-2">
+        <div className="flex items-center gap-1 text-base font-semibold text-ink-soft sm:gap-3 sm:text-lg">
           <a href="#how" className="rounded-full px-3 py-2 hover:text-cobalt">
             How it works
           </a>
@@ -73,14 +73,14 @@ export const Hero = ({
 
       <div className="mt-auto">
         <motion.div
-          className="max-w-md pb-8 sm:pb-10"
+          className="max-w-xl pb-8 sm:pb-10"
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 1.0 }}
           style={{ opacity: fade }}
           suppressHydrationWarning
         >
-          <p className="font-serif text-xl leading-8 text-ink-soft sm:text-[1.35rem] sm:leading-9">
+          <p className="font-serif text-[1.3rem] leading-9 text-ink-soft sm:text-[1.6rem] sm:leading-[2.6rem]">
             If it hadn&rsquo;t rained, would the harvest have failed? Causalitea
             asks language models what-if questions about cause and effect, then
             checks whether their answers follow the arrows.
@@ -89,7 +89,7 @@ export const Hero = ({
             <a href="#lab" className="btn-primary">
               Run a test
             </a>
-            <a href="#how" className="btn-quiet py-3.5 text-base">
+            <a href="#how" className="btn-quiet px-8 py-4 text-lg">
               See how it works
             </a>
           </div>
