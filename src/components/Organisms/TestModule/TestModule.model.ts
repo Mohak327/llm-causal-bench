@@ -1,9 +1,9 @@
 // Error type definitions
 export const ERROR_TYPES = [
-  { code: 0, name: "No Error", color: "text-emerald-400" },
-  { code: 1, name: "Not Changing Downstream Variables", color: "text-red-400" },
-  { code: 2, name: "Changing Upstream Variables", color: "text-orange-400" },
-  { code: 3, name: "Correlation Effect", color: "text-yellow-400" },
+  { code: 0, name: "No error", color: "bg-leaf-mist text-leaf" },
+  { code: 1, name: "Missed the ripple (Type I)", color: "bg-kiln-mist text-kiln" },
+  { code: 2, name: "Rewrote the past (Type II)", color: "bg-tea-mist text-tea-deep" },
+  { code: 3, name: "Guessed by association (Type III)", color: "bg-cobalt-mist text-cobalt" },
 ];
 
 // Sample data structure
@@ -24,10 +24,10 @@ export const SAMPLE_SCM = {
 
 // Available models for testing
 export const AVAILABLE_MODELS = [
-  { id: "claude", name: "Claude Sonnet 4.5", color: "bg-orange-500" },
-  { id: "gpt4", name: "GPT-4", color: "bg-green-500" },
-  { id: "gemini", name: "Gemini 2.5 Flash", color: "bg-blue-500" },
-  { id: "llama", name: "Llama 3", color: "bg-purple-500" },
+  { id: "claude", name: "Claude Sonnet 4.5", color: "bg-[#C9693C]" },
+  { id: "gpt4", name: "GPT-4", color: "bg-[#2F7D5B]" },
+  { id: "gemini", name: "Gemini 2.5 Flash", color: "bg-[#4E66B8]" },
+  { id: "llama", name: "Llama 3", color: "bg-[#7A5AA6]" },
 ];
 
 // Dummy data for testing UI

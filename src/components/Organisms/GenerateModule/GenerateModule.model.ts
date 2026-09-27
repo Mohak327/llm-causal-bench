@@ -5,6 +5,13 @@ export const AVAILABLE_MODELS = [
   { id: "gemini", name: "Gemini 2.5 Flash" },
 ];
 
+export const PROMPT_IDEAS = [
+  "A patient's medication dosage, blood pressure and recovery",
+  "Oven temperature, baking time and cake texture",
+  "A driver's speed, braking distance and whether a crash happens",
+  "Training volume, muscle fatigue and race-day performance",
+];
+
 // Dummy generated SCMs for testing
 export const DUMMY_SCMS = [
   {

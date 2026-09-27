@@ -8,5 +8,6 @@ export interface GenerateModuleViewProps {
   error: string;
   generateSCMs: () => void;
   copyToClipboard: (data: any) => void;
+  copiedId: number | null;
   loadDummyData: () => void;
 }

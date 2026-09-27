@@ -53,8 +53,12 @@ export const GenerateModule = () => {
     }
   };
 
-  const copyToClipboard = (data: any) => {
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  const copyToClipboard = async (data: any) => {
+    await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    setCopiedId(data.id);
+    setTimeout(() => setCopiedId(null), 1800);
   };
 
   return (
@@ -68,6 +72,7 @@ export const GenerateModule = () => {
       error={error}
       generateSCMs={generateSCMs}
       copyToClipboard={copyToClipboard}
+      copiedId={copiedId}
       loadDummyData={loadDummyData}
     />
   );

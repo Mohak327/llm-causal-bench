@@ -1,3 +1,76 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    background: #eef1f5;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  ::selection {
+    background: #1d3a9e;
+    color: #eef1f5;
+  }
+
+  :focus-visible {
+    outline: 2px solid #1d3a9e;
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  .field {
+    @apply w-full rounded-2xl border border-glaze bg-white/70 px-5 py-4 font-serif text-lg leading-relaxed text-ink shadow-[inset_0_1px_2px_rgba(19,26,46,0.06)] outline-none transition-colors placeholder:text-ink-faint focus:border-cobalt focus:bg-white;
+  }
+
+  .field-label {
+    @apply mb-2 block text-sm font-semibold text-ink-soft;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-cobalt px-7 py-3.5 font-semibold text-porcelain transition-[background-color,transform] hover:bg-ink active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-glaze disabled:text-ink-faint;
+  }
+
+  .btn-quiet {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-glaze bg-white/60 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-cobalt hover:text-cobalt;
+  }
+}
+
+/* React Flow, glazed to match */
+.react-flow__node-default {
+  box-shadow: 0 6px 18px -8px rgba(29, 58, 158, 0.35);
+}
+.react-flow__controls {
+  box-shadow: none !important;
+  border: 1px solid #d5dce6;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.react-flow__controls-button {
+  background: #fff;
+  border-bottom: 1px solid #d5dce6;
+  fill: #4a5470;
+}
+.react-flow__controls-button:hover {
+  background: #eef1f5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

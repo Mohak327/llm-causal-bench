@@ -7,6 +7,8 @@ export interface TestModuleViewProps {
   toggleModel: (modelId: string) => void;
   testing: boolean;
   results: any;
+  error: string;
   runTest: () => void;
   loadDummyData: () => void;
+  fillExample: () => void;
 }

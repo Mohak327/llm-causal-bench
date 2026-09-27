@@ -14,13 +14,19 @@ export const TestModule = () => {
   ]);
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [error, setError] = useState("");
 
-  // Dummy data for testing UI
   const loadDummyData = () => {
+    setError("");
     setResults({
       scm: SAMPLE_SCM,
       responses: DUMMY_RESPONSES,
     });
+  };
+
+  const fillExample = () => {
+    setTextInput(SAMPLE_SCM.T);
+    setQueryInput(SAMPLE_SCM.Q);
   };
 
   const toggleModel = (modelId: string) => {
@@ -33,6 +39,7 @@ export const TestModule = () => {
 
   const runTest = async () => {
     setTesting(true);
+    setError("");
 
     try {
       const response = await fetch("/api/test-models", {
@@ -64,8 +71,12 @@ export const TestModule = () => {
         scm: SAMPLE_SCM,
         responses: analyzedResponses,
       });
-    } catch (error) {
-      console.error("Error running tests:", error);
+    } catch (err: any) {
+      console.error("Error running tests:", err);
+      setError(
+        err?.message ||
+          "The test couldn't run. Check that the model API keys are configured."
+      );
     } finally {
       setTesting(false);
     }
@@ -81,8 +92,10 @@ export const TestModule = () => {
       toggleModel={toggleModel}
       testing={testing}
       results={results}
+      error={error}
       runTest={runTest}
       loadDummyData={loadDummyData}
+      fillExample={fillExample}
     />
   );
 };

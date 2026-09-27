@@ -1,59 +1,81 @@
 "use client";
-import React, { useState } from 'react';
-import { Sparkles, TestTube, BarChart3 } from 'lucide-react';
-import { GenerateModule } from '@/components/Organisms/GenerateModule/GenerateModule.controller';
-import { TestModule } from '@/components/Organisms/TestModule/TestModule.controller';
+import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import {
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
+import { ReactLenis } from "lenis/react";
+import { Hero } from "@/components/Landing/Hero";
+import { Story } from "@/components/Landing/Story";
+import { Lab } from "@/components/Landing/Lab";
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('test');
+const CausalScene = dynamic(() => import("@/components/Scene/CausalScene"), {
+  ssr: false,
+});
+
+export default function Home() {
+  const reduced = useReducedMotion() ?? false;
+  const heroRef = useRef(null);
+  const storyRef = useRef(null);
+  const labRef = useRef(null);
+
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const { scrollYProgress: storyProgress } = useScroll({
+    target: storyRef,
+    offset: ["start start", "end end"],
+  });
+  const { scrollYProgress: labProgress } = useScroll({
+    target: labRef,
+    offset: ["start end", "start start"],
+  });
+
+  const stage = useTransform(
+    [heroProgress, storyProgress],
+    ([h, s]) => h + s * 5
+  );
+  const sceneOpacity = useTransform(labProgress, [0, 0.8], [1, 0]);
+
+  const [step, setStep] = useState(0);
+  const [sceneActive, setSceneActive] = useState(true);
+
+  useMotionValueEvent(stage, "change", (v) => {
+    const next = Math.min(5, Math.max(0, Math.floor(v + 0.1)));
+    setStep((prev) => (prev === next ? prev : next));
+  });
+  useMotionValueEvent(labProgress, "change", (v) => {
+    setSceneActive(v < 0.99);
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <div className="max-w-7xl mx-auto p-6">
-        <header className="mb-8">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <BarChart3 className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-white">CausalBench</h1>
-              <p className="text-slate-400 mt-1">LLM Counterfactual Reasoning Observatory</p>
-            </div>
-          </div>
-        </header>
+    <main id="top">
+      {!reduced && <ReactLenis root options={{ lerp: 0.1, anchors: true }} />}
 
-        <div className="flex gap-4 mb-6">
-          <button
-            onClick={() => setActiveTab('test')}
-            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
-              activeTab === 'test'
-                ? 'bg-cyan-600 text-white shadow-lg'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <TestTube className="w-5 h-5" />
-              Test Models
-            </div>
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('generate')}
-            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
-              activeTab === 'generate'
-                ? 'bg-purple-600 text-white shadow-lg'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Sparkles className="w-5 h-5" />
-              Generate Benchmarks
-            </div>
-          </button>
-        </div>
+      <motion.div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{ opacity: sceneOpacity }}
+        aria-hidden
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(60%_55%_at_68%_38%,#ffffff_0%,rgba(255,255,255,0)_70%),radial-gradient(40%_40%_at_10%_90%,#dce3f4_0%,rgba(220,227,244,0)_70%)]" />
+        <CausalScene
+          stage={stage}
+          step={step}
+          reduced={reduced}
+          active={sceneActive}
+        />
+      </motion.div>
 
-        {activeTab === 'test' ? <TestModule /> : <GenerateModule />}
+      <div ref={heroRef}>
+        <Hero progress={heroProgress} reduced={reduced} />
       </div>
-    </div>
+      <Story ref={storyRef} step={step} progress={storyProgress} reduced={reduced} />
+      <Lab ref={labRef} reduced={reduced} />
+    </main>
   );
 }

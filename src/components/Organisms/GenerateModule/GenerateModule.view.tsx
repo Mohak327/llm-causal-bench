@@ -1,9 +1,29 @@
-import { AlertCircle, Copy, Sparkles, FileJson } from "lucide-react";
-import { AVAILABLE_MODELS } from "./GenerateModule.model";
-import ReactMarkdown from "react-markdown";
-import { ENV_CONFIG } from "@/config/env.config";
+import { AnimatePresence, motion } from "motion/react";
+import { Check, Copy } from "lucide-react";
+import { AVAILABLE_MODELS, PROMPT_IDEAS } from "./GenerateModule.model";
 import { SCMGraph } from "@/components/Molecules/SCMGraph/SCMGraph";
+import { Prose } from "@/components/Molecules/Prose/Prose";
 import { GenerateModuleViewProps } from "./GenerateModule.types";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+// Renders "T_{A=low_dose}" style notation with real subscripts.
+const Notation = ({ text }: { text: string }) => (
+  <>
+    {text.split(/_\{([^}]*)\}/).map((part, i) =>
+      i % 2 ? (
+        <sub key={i} className="text-[0.7em]">
+          {part.replace(/_/g, " ")}
+        </sub>
+      ) : (
+        part
+      )
+    )}
+  </>
+);
+
+const modelName = (id?: string) =>
+  AVAILABLE_MODELS.find((m) => m.id === id)?.name ?? id ?? "Claude";
 
 export const GenerateModuleView = ({
   prompt,
@@ -15,267 +35,222 @@ export const GenerateModuleView = ({
   error,
   generateSCMs,
   copyToClipboard,
+  copiedId,
   loadDummyData,
 }: GenerateModuleViewProps) => {
   return (
-    <div className="space-y-6">
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <div className="flex items-center gap-3 mb-4">
-          <Sparkles className="w-6 h-6 text-purple-400" />
-          <h2 className="text-2xl font-bold text-white">
-            Generate SCM Benchmarks
-          </h2>
+    <div className="space-y-14">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div>
+          <label htmlFor="gen-prompt" className="field-label">
+            What should the scenario be about?
+          </label>
+          <textarea
+            id="gen-prompt"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Describe a situation with a few linked causes, for example: a drug's dosage, a patient's blood pressure and how quickly they recover."
+            className="field h-44 resize-none"
+            data-lenis-prevent
+          />
+          <div className="mt-4 flex flex-wrap gap-2">
+            {PROMPT_IDEAS.map((idea) => (
+              <button
+                key={idea}
+                onClick={() => setPrompt(idea)}
+                className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+                  prompt === idea
+                    ? "border-cobalt bg-cobalt-mist text-cobalt"
+                    : "border-glaze bg-white/50 text-ink-soft hover:border-cobalt hover:text-cobalt"
+                }`}
+              >
+                {idea}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Foundation Model
-            </label>
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            >
-              {AVAILABLE_MODELS.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Generation Prompt
-            </label>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the scenario you want to generate causal graphs for... (e.g., 'Create a medical scenario involving drug effectiveness')"
-              className="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-            />
-          </div>
-
-          <button
-            onClick={generateSCMs}
-            disabled={generating || !prompt}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            {generating ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                Generate SCM Benchmark
-              </>
-            )}
-          </button>
-
-          {ENV_CONFIG.SHOW_DEBUG_FEATURES && (
-            <button
-              onClick={loadDummyData}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              <FileJson className="w-5 h-5" />
-              Load Dummy SCMs (Testing)
-            </button>
-          )}
-
-          {error && (
-            <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <div className="text-red-300 text-sm">{error}</div>
+        <div className="space-y-6">
+          <fieldset>
+            <legend className="field-label">Model that writes it</legend>
+            <div className="space-y-2" role="radiogroup">
+              {AVAILABLE_MODELS.map((model) => {
+                const on = selectedModel === model.id;
+                return (
+                  <button
+                    key={model.id}
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => setSelectedModel(model.id)}
+                    className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left font-semibold transition-colors ${
+                      on
+                        ? "border-cobalt bg-white text-ink"
+                        : "border-glaze bg-white/40 text-ink-faint hover:border-ink-faint"
+                    }`}
+                  >
+                    <span
+                      className={`grid h-5 w-5 place-items-center rounded-full border-2 ${
+                        on ? "border-cobalt" : "border-glaze"
+                      }`}
+                    >
+                      {on && <span className="h-2 w-2 rounded-full bg-cobalt" />}
+                    </span>
+                    {model.name}
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </fieldset>
+
+          <div className="space-y-3">
+            <button
+              onClick={generateSCMs}
+              disabled={generating || !prompt}
+              className="btn-primary w-full"
+            >
+              {generating ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-porcelain border-t-transparent" />
+                  Writing the scenario
+                </>
+              ) : (
+                "Generate a scenario"
+              )}
+            </button>
+            <button onClick={loadDummyData} className="btn-quiet w-full">
+              Load sample scenarios
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                role="alert"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden rounded-2xl bg-kiln-mist px-4 py-3 text-sm text-kiln"
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
       {generatedSCMs.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-            <FileJson className="w-5 h-5 text-purple-400" />
-            Generated SCMs ({generatedSCMs.length})
-          </h3>
+        <div className="space-y-8">
+          {generatedSCMs.map((scm, index) => {
+            const intervened: string[] = scm.V ?? [];
+            return (
+              <motion.article
+                key={scm.id}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: index * 0.1, ease: EASE }}
+                className="overflow-hidden rounded-[2rem] border border-glaze bg-white/80"
+              >
+                <header className="flex items-center justify-between gap-4 border-b border-glaze px-6 py-4 sm:px-8">
+                  <p className="text-sm text-ink-soft">
+                    Written by{" "}
+                    <span className="font-semibold text-ink">
+                      {modelName(scm.generatedBy)}
+                    </span>{" "}
+                    on {new Date(scm.timestamp).toLocaleString()}
+                  </p>
+                  <button
+                    onClick={() => copyToClipboard(scm)}
+                    className="btn-quiet shrink-0 px-4 py-2"
+                  >
+                    {copiedId === scm.id ? (
+                      <>
+                        <Check className="h-4 w-4" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" /> Copy JSON
+                      </>
+                    )}
+                  </button>
+                </header>
 
-          {generatedSCMs.map((scm) => (
-            <div
-              key={scm.id}
-              className="bg-slate-800 rounded-lg p-6 border border-slate-700"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center align-center justify-between mb-4">
-                    <div className="text-sm text-slate-400">
-                      Generated: {new Date(scm.timestamp).toLocaleString()} •
-                      Model: {scm.generatedBy || "claude"}
+                <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                  <dl className="space-y-7 p-6 sm:p-8">
+                    <div>
+                      <dt className="mb-2 text-sm font-semibold text-ink-soft">
+                        The story
+                      </dt>
+                      <dd>
+                        <Prose>{scm.T}</Prose>
+                      </dd>
                     </div>
-                    <button
-                      onClick={() => copyToClipboard(scm)}
-                      className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-                      title="Copy JSON"
-                    >
-                      <Copy className="w-4 h-4 text-slate-300" />
-                    </button>
-                  </div>
-                  <div className="bg-slate-900 rounded p-4 mb-3">
-                    <div className="text-slate-400 mb-2 font-semibold text-xs uppercase tracking-wide">
-                      Text (T):
+                    <div>
+                      <dt className="mb-2 text-sm font-semibold text-ink-soft">
+                        The what-if question
+                      </dt>
+                      <dd>
+                        <Prose>{scm.Q}</Prose>
+                      </dd>
                     </div>
-                    <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-strong:font-bold prose-li:text-slate-200">
-                      <ReactMarkdown
-                        components={{
-                          p: ({ children }) => (
-                            <p className="mb-2 leading-relaxed">{children}</p>
-                          ),
-                          strong: ({ children }) => (
-                            <strong className="font-bold text-white">
-                              {children}
-                            </strong>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="list-decimal list-outside ml-5 space-y-2 my-3">
-                              {children}
-                            </ol>
-                          ),
-                          ul: ({ children }) => (
-                            <ul className="list-disc list-outside ml-5 space-y-2 my-3">
-                              {children}
-                            </ul>
-                          ),
-                          li: ({ children }) => (
-                            <li className="text-slate-200 leading-relaxed">
-                              {children}
-                            </li>
-                          ),
-                        }}
-                      >
-                        {scm.T}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                  <div className="bg-slate-900 rounded p-4 mb-3">
-                    <div className="text-slate-400 mb-2 font-semibold text-xs uppercase tracking-wide">
-                      Query (Q):
-                    </div>
-                    <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-strong:font-bold prose-li:text-slate-200">
-                      <ReactMarkdown
-                        components={{
-                          p: ({ children }) => (
-                            <p className="mb-2 leading-relaxed">{children}</p>
-                          ),
-                          strong: ({ children }) => (
-                            <strong className="font-bold text-white">
-                              {children}
-                            </strong>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="list-decimal list-outside ml-5 space-y-2 my-3">
-                              {children}
-                            </ol>
-                          ),
-                          ul: ({ children }) => (
-                            <ul className="list-disc list-outside ml-5 space-y-2 my-3">
-                              {children}
-                            </ul>
-                          ),
-                          li: ({ children }) => (
-                            <li className="text-slate-200 leading-relaxed">
-                              {children}
-                            </li>
-                          ),
-                        }}
-                      >
-                        {scm.Q}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                  {scm.S && (
-                    <div className="bg-slate-900 rounded p-4">
-                      <div className="text-slate-400 mb-2 font-semibold text-xs uppercase tracking-wide">
-                        Solution (S):
+                    {scm.S && (
+                      <div className="rounded-2xl bg-leaf-mist/60 p-5">
+                        <dt className="mb-2 text-sm font-semibold text-leaf">
+                          What should happen
+                        </dt>
+                        <dd>
+                          <Prose size="sm">{scm.S}</Prose>
+                        </dd>
                       </div>
-                      <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-strong:font-bold prose-li:text-slate-200">
-                        <ReactMarkdown
-                          components={{
-                            p: ({ children }) => (
-                              <p className="mb-2 leading-relaxed">{children}</p>
-                            ),
-                            strong: ({ children }) => (
-                              <strong className="font-bold text-white">
-                                {children}
-                              </strong>
-                            ),
-                            ol: ({ children }) => (
-                              <ol className="list-decimal list-outside ml-5 space-y-2 my-3">
-                                {children}
-                              </ol>
-                            ),
-                            ul: ({ children }) => (
-                              <ul className="list-disc list-outside ml-5 space-y-2 my-3">
-                                {children}
-                              </ul>
-                            ),
-                            li: ({ children }) => (
-                              <li className="text-slate-200 leading-relaxed">
-                                {children}
-                              </li>
-                            ),
-                          }}
-                        >
-                          {scm.S}
-                        </ReactMarkdown>
+                    )}
+                    {scm.M && (
+                      <div>
+                        <dt className="mb-2 text-sm font-semibold text-ink-soft">
+                          Formally
+                        </dt>
+                        <dd className="inline-block rounded-full border border-glaze px-4 py-1.5 font-serif text-lg italic text-cobalt">
+                          <Notation text={scm.M} />
+                        </dd>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+                    )}
+                  </dl>
 
-              <div className="mt-4 flex flex-col lg:flex-row gap-4">
-                {/* Left side - Nodes and Edges stacked vertically */}
-                <div className="w-full lg:w-2/5 space-y-4">
-                  <div className="bg-slate-900 rounded p-4">
-                    <div className="text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wide">
-                      Nodes
-                    </div>
-                    <div className="space-y-2">
-                      {Object.entries(scm.G.nodes).map(([key, val]) => (
-                        <div key={key} className="text-sm text-white">
-                          <span className="font-bold text-purple-400">
-                            {key}:
-                          </span>{" "}
-                          {String(val)}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-slate-900 rounded p-4">
-                    <div className="text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wide">
-                      Edges
-                    </div>
-                    <div className="space-y-2">
-                      {scm.G.edges.map((edge: string[], i: number) => (
-                        <div key={i} className="text-sm text-white">
-                          {edge[0]} → {edge[1]}
-                        </div>
-                      ))}
-                    </div>
+                  <div className="border-t border-glaze bg-porcelain/60 p-6 sm:p-8 lg:border-l lg:border-t-0">
+                    <SCMGraph
+                      nodes={scm.G.nodes}
+                      edges={scm.G.edges}
+                      intervened={intervened}
+                    />
+                    <ul className="mt-6 space-y-2 text-sm">
+                      {Object.entries(scm.G.nodes).map(([key, val]) => {
+                        const isV = intervened.includes(key);
+                        return (
+                          <li key={key} className="flex items-center gap-3">
+                            <span
+                              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
+                                isV
+                                  ? "bg-tea text-white"
+                                  : "bg-cobalt-mist text-cobalt"
+                              }`}
+                            >
+                              {key}
+                            </span>
+                            <span className="text-ink">
+                              {String(val).replace(/_/g, " ")}
+                            </span>
+                            {isV && (
+                              <span className="text-xs font-semibold text-tea-deep">
+                                changed by hand
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 </div>
-
-                {/* Right side - Graph Visualization */}
-                <div className="w-full lg:w-3/5">
-                  <div className="text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wide">
-                    Causal Graph Visualization
-                  </div>
-                  <SCMGraph nodes={scm.G.nodes} edges={scm.G.edges} />
-                </div>
-              </div>
-            </div>
-          ))}
+              </motion.article>
+            );
+          })}
         </div>
       )}
     </div>
