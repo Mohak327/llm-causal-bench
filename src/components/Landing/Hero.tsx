@@ -47,6 +47,7 @@ export const Hero = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 1.1 }}
         style={{ opacity: fade }}
+        suppressHydrationWarning
       >
         <a href="#top" className="flex items-center gap-2 text-lg font-bold tracking-[-0.02em]">
           <LogoMark className="h-9 w-9" />
@@ -77,6 +78,7 @@ export const Hero = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 1.0 }}
           style={{ opacity: fade }}
+          suppressHydrationWarning
         >
           <p className="font-serif text-xl leading-8 text-ink-soft sm:text-[1.35rem] sm:leading-9">
             If it hadn&rsquo;t rained, would the harvest have failed? Causalitea
@@ -97,6 +99,7 @@ export const Hero = ({
           aria-label="Causalitea"
           className="select-none whitespace-nowrap text-[clamp(3.6rem,20.5vw,24rem)] leading-[0.82] tracking-[-0.045em] text-ink"
           style={{ fontVariationSettings: variation, y: headlineY, opacity: fade }}
+          suppressHydrationWarning
         >
           <span className="-ml-[0.04em] block overflow-hidden pb-[0.08em]">
             {WORD.map((letter, i) => (

@@ -398,20 +398,13 @@ function Cup({
       .applyAxisAngle(tmp.zAxis, -tiltAngle)
       .applyEuler(tmp.e.set(lean, 0, 0));
 
-    // The cup's lean toward the viewer is a presentation angle, like a camera
-    // looking down, so "level" is measured against the leaned up axis. That
-    // keeps the surface visible from the front while it still stays level
-    // as the cup tips.
-    tmp.upLocal.set(0, 1, 0).applyEuler(tmp.e.set(lean, 0, 0));
-    const hFloor = tmp.floor.dot(tmp.upLocal);
-    const hLip = p.lip.dot(tmp.upLocal);
-
-    // Liquid level: fills the cavity by volume but can never stand above the
-    // lip it is pouring over.
-    const low = Math.min(hFloor, hLip);
-    const fromVolume =
-      low + volume * MAX_FILL * CAVITY_DEPTH * scale * Math.max(Math.cos(tiltAngle), 0.12);
-    const level = Math.min(fromVolume, hLip - 0.004 * scale);
+    // The tea surface is held in the cup's own frame, so it tips with the cup
+    // and drops toward the floor as the volume drains.
+    tmp.upLocal
+      .set(0, 1, 0)
+      .applyAxisAngle(tmp.zAxis, -tiltAngle)
+      .applyEuler(tmp.e.set(lean, 0, 0));
+    const depthAlongAxis = volume * MAX_FILL * CAVITY_DEPTH * scale;
     const flowing = volume > 0.03 && tiltAngle > 1.2 && o.visible;
     p.rate = flowing && !reduced ? 380 : 0;
 
@@ -431,12 +424,16 @@ function Cup({
     const cap = surface.current;
     if (rig && cap) {
       cap.visible = hasLiquid;
-      tmp.point.copy(tmp.floor).addScaledVector(tmp.upLocal, level - hFloor);
+      tmp.point.copy(tmp.floor).addScaledVector(tmp.upLocal, depthAlongAxis);
       tmp.world.copy(tmp.point);
       rig.localToWorld(tmp.world);
 
-      // Slosh tips the surface a little around the leaned axis.
-      tmp.upLocal.set(sl.w, 1, 0).normalize().applyEuler(tmp.e.set(lean, 0, 0));
+      // Slosh rocks the surface a little around the cup's tilt axis.
+      tmp.upLocal
+        .set(sl.w, 1, 0)
+        .normalize()
+        .applyAxisAngle(tmp.zAxis, -tiltAngle)
+        .applyEuler(tmp.e.set(lean, 0, 0));
       rig.getWorldQuaternion(tmp.rigQuat);
       tmp.up.copy(tmp.upLocal).applyQuaternion(tmp.rigQuat);
       plane.setFromNormalAndCoplanarPoint(tmp.up.clone().negate(), tmp.world);
@@ -531,6 +528,8 @@ const GRAVITY = 11;
 const LIQUID = 0;
 const FIZZ = 1;
 const SPLASH = 2;
+// Liquid that breaks away from the main rope and falls as separate droplets.
+const LOOSE = 3;
 const SPINE = 260;
 const RADIAL = 10;
 
@@ -656,14 +655,21 @@ function Stream({
         const y = THREE.MathUtils.lerp(sim.prevLip.y, p.lip.y, f);
         const z = THREE.MathUtils.lerp(sim.prevLip.z, p.lip.z, f) + (Math.random() - 0.5) * 0.02;
         const speed = 0.75 + Math.random() * 0.1;
-        const fizz = Math.random() < 0.08;
+        const roll = Math.random();
+        const kind = roll < 0.08 ? FIZZ : roll < 0.2 ? LOOSE : LIQUID;
+        // Loose drops get a sideways kick so they peel away from the rope.
+        const kick = kind === LOOSE ? 0.35 : 0;
         spawn(
           x, y, z,
-          p.dir.x * speed + tmp.lipVel.x * 0.15 + waver,
+          p.dir.x * speed + tmp.lipVel.x * 0.15 + waver + (Math.random() - 0.5) * kick,
           p.dir.y * speed + tmp.lipVel.y * 0.15,
-          p.dir.z * speed + waver * 0.5,
-          fizz ? FIZZ : LIQUID,
-          fizz ? 0.012 + Math.random() * 0.01 : 0.03 + Math.random() * 0.015,
+          p.dir.z * speed + waver * 0.5 + (Math.random() - 0.5) * kick,
+          kind,
+          kind === FIZZ
+            ? 0.012 + Math.random() * 0.01
+            : kind === LOOSE
+              ? 0.022 + Math.random() * 0.03
+              : 0.03 + Math.random() * 0.015,
           3,
           (1 - f) * dt
         );
@@ -698,9 +704,9 @@ function Stream({
           if (tmp.p.distanceToSquared(b.pos) < b.r * b.r) {
             sim.life[i] = 0;
             b.impulse = Math.min(b.impulse + 0.006, 0.14);
-            if (kind === LIQUID && Math.random() < 0.07) {
+            if ((kind === LIQUID || kind === LOOSE) && Math.random() < 0.16) {
               tmp.v.subVectors(tmp.p, b.pos).normalize();
-              for (let k = 0; k < 2; k++) {
+              for (let k = 0; k < 3; k++) {
                 spawn(
                   tmp.p.x, tmp.p.y, tmp.p.z,
                   tmp.v.x * 1.3 + (Math.random() - 0.5) * 1.1,
@@ -762,7 +768,7 @@ function Stream({
         rope.py[count] = y;
         rope.pz[count] = z;
         // Continuity: a stream narrows as it accelerates.
-        rope.pr[count] = 0.068 / Math.sqrt(1 + 0.45 * speed);
+        rope.pr[count] = 0.085 / Math.sqrt(1 + 0.45 * speed);
         rope.seg[count] = seg;
         rope.members.fill(-1, count * 8, count * 8 + 8);
         rope.members[count * 8] = i;
