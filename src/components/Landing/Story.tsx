@@ -77,8 +77,8 @@ export const Story = forwardRef<
       className="relative z-10 h-[600vh]"
       aria-label="How the benchmark works"
     >
-      <div className="sticky top-0 flex h-[100svh] items-end px-5 pb-8 sm:px-10 lg:items-center lg:pb-0">
-        <div className="relative w-full max-w-[38rem] rounded-[2rem] bg-porcelain/85 p-6 backdrop-blur-md sm:p-8 lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
+      <div className="sticky top-0 flex h-[100svh] items-end px-6 pb-10 sm:px-14 lg:items-center lg:px-20 lg:pb-0">
+        <div className="relative w-full max-w-[31rem] rounded-[2rem] bg-porcelain/85 p-6 backdrop-blur-md sm:p-8 lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
           <ol className="mb-8 flex items-center gap-2" aria-label="Steps">
             {STEPS.map((s, i) => (
               <li key={s.title} className="flex items-center gap-2">

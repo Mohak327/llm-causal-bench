@@ -40,7 +40,7 @@ export const Hero = ({
   const fade = useTransform(progress, [0, 0.55], [1, 0]);
 
   return (
-    <section className="relative z-10 flex h-[100svh] flex-col px-5 pb-8 pt-5 sm:px-10 sm:pb-12">
+    <section className="relative z-10 flex h-[100svh] flex-col px-6 pb-10 pt-7 sm:px-14 sm:pb-14 sm:pt-9 lg:px-20">
       <motion.nav
         className="flex items-center justify-between"
         initial={reduced ? false : { opacity: 0, y: -12 }}
@@ -97,7 +97,7 @@ export const Hero = ({
 
         <motion.h1
           aria-label="Causalitea"
-          className="select-none whitespace-nowrap text-[clamp(3.6rem,20.5vw,24rem)] leading-[0.82] tracking-[-0.045em] text-ink"
+          className="select-none whitespace-nowrap text-[clamp(3.4rem,19.4vw,24rem)] leading-[0.82] tracking-[-0.045em] text-ink"
           style={{ fontVariationSettings: variation, y: headlineY, opacity: fade }}
           suppressHydrationWarning
         >

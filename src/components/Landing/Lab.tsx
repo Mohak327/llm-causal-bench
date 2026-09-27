@@ -19,7 +19,7 @@ export const Lab = forwardRef<HTMLElement, { reduced: boolean }>(
       <section
         ref={ref}
         id="lab"
-        className="relative z-20 -mt-[1px] rounded-t-[2.5rem] bg-porcelain px-5 pb-24 pt-16 shadow-[0_-30px_60px_-30px_rgba(19,26,46,0.25)] sm:rounded-t-[3.5rem] sm:px-10 sm:pt-24"
+        className="relative z-20 -mt-[1px] rounded-t-[2.5rem] bg-porcelain px-6 pb-28 pt-20 shadow-[0_-30px_60px_-30px_rgba(19,26,46,0.25)] sm:rounded-t-[3.5rem] sm:px-14 sm:pt-28 lg:px-20"
       >
         <div className="mx-auto max-w-6xl">
           <header className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -47,7 +47,7 @@ export const Lab = forwardRef<HTMLElement, { reduced: boolean }>(
                   aria-selected={tab === t.id}
                   aria-controls={`panel-${t.id}`}
                   onClick={() => setTab(t.id)}
-                  className={`relative flex-1 whitespace-nowrap rounded-full px-6 py-3 text-base font-semibold transition-colors sm:flex-none ${
+                  className={`relative flex-1 whitespace-nowrap rounded-full px-3 py-3 text-[15px] font-semibold sm:px-6 sm:text-base transition-colors sm:flex-none ${
                     tab === t.id ? "text-porcelain" : "text-ink-soft hover:text-cobalt"
                   }`}
                 >
