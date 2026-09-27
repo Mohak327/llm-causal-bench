@@ -523,16 +523,19 @@ function Cup({
   );
 }
 
-const MAX_DROPS = 1000;
 const GRAVITY = 11;
-const LIQUID = 0;
+const EXIT_SPEED = 0.8;
+const STREAM_SEGMENTS = 64;
+const STREAM_RADIAL = 12;
+const MAX_PARTICLES = 500;
 const FIZZ = 1;
 const SPLASH = 2;
-// Liquid that breaks away from the main rope and falls as separate droplets.
-const LOOSE = 3;
-const SPINE = 260;
-const RADIAL = 10;
 
+// The falling stream is the ballistic path of liquid leaving the lip:
+//   p(t) = lip - lipVelocity*t + v0*t - ½g t²
+// where t is how long ago that liquid left the cup. Drawing the tube along
+// this curve keeps it smooth and stable every frame; particles are only used
+// for splashes where it lands and for fizz riding down it.
 function Stream({
   pour,
   bodies,
@@ -540,333 +543,296 @@ function Stream({
   pour: React.RefObject<Pour>;
   bodies: React.RefObject<Body[]>;
 }) {
+  const streamMesh = useRef<THREE.Mesh>(null);
   const dropMesh = useRef<THREE.InstancedMesh>(null);
   const fizzMesh = useRef<THREE.InstancedMesh>(null);
-  const sim = useMemo(
-    () => ({
-      pos: new Float32Array(MAX_DROPS * 3),
-      vel: new Float32Array(MAX_DROPS * 3),
-      life: new Float32Array(MAX_DROPS),
-      size: new Float32Array(MAX_DROPS),
-      kind: new Uint8Array(MAX_DROPS),
-      inRope: new Uint8Array(MAX_DROPS),
-      next: 0,
-      carry: 0,
-      prevLip: new THREE.Vector3(),
-      primed: false,
-      time: 0,
-    }),
-    []
-  );
 
-  // The rope: a tube rebuilt every frame through the live drops in emission
-  // order, so its shape comes straight from the particle physics.
-  const rope = useMemo(() => {
+  const tube = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
-    const position = new THREE.BufferAttribute(new Float32Array(SPINE * RADIAL * 3), 3);
-    const normal = new THREE.BufferAttribute(new Float32Array(SPINE * RADIAL * 3), 3);
+    const verts = (STREAM_SEGMENTS + 1) * STREAM_RADIAL;
+    const position = new THREE.BufferAttribute(new Float32Array(verts * 3), 3);
+    const normal = new THREE.BufferAttribute(new Float32Array(verts * 3), 3);
     position.setUsage(THREE.DynamicDrawUsage);
     normal.setUsage(THREE.DynamicDrawUsage);
     geometry.setAttribute("position", position);
     geometry.setAttribute("normal", normal);
-    const index = new THREE.BufferAttribute(new Uint16Array(SPINE * RADIAL * 6), 1);
-    index.setUsage(THREE.DynamicDrawUsage);
+    const index: number[] = [];
+    for (let i = 0; i < STREAM_SEGMENTS; i++) {
+      for (let a = 0; a < STREAM_RADIAL; a++) {
+        const a2 = (a + 1) % STREAM_RADIAL;
+        const i0 = i * STREAM_RADIAL + a;
+        const i1 = i * STREAM_RADIAL + a2;
+        const i2 = (i + 1) * STREAM_RADIAL + a;
+        const i3 = (i + 1) * STREAM_RADIAL + a2;
+        index.push(i0, i1, i2, i1, i3, i2);
+      }
+    }
     geometry.setIndex(index);
     geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 100);
-    return {
-      geometry,
-      position,
-      normal,
-      index,
-      px: new Float32Array(SPINE),
-      py: new Float32Array(SPINE),
-      pz: new Float32Array(SPINE),
-      pr: new Float32Array(SPINE),
-      seg: new Int32Array(SPINE),
-      members: new Int32Array(SPINE * 8),
-    };
+    return { geometry, position, normal };
   }, []);
 
-  const tmp = useMemo(
+  const st = useMemo(
     () => ({
-      m: new THREE.Matrix4(),
-      q: new THREE.Quaternion(),
-      p: new THREE.Vector3(),
-      v: new THREE.Vector3(),
-      s: new THREE.Vector3(),
-      t: new THREE.Vector3(),
-      n: new THREE.Vector3(),
-      b: new THREE.Vector3(),
-      ref: new THREE.Vector3(),
-      up: new THREE.Vector3(0, 1, 0),
-      lipVel: new THREE.Vector3(),
+      pouring: false,
+      falling: false,
+      headT: 0,
+      tailT: 0,
+      origin: new THREE.Vector3(),
+      velocity: new THREE.Vector3(),
+      lag: new THREE.Vector3(),
+      prevLip: new THREE.Vector3(),
+      primed: false,
+      time: 0,
+      splashCarry: 0,
+      fizzCarry: 0,
+      pos: new Float32Array(MAX_PARTICLES * 3),
+      vel: new Float32Array(MAX_PARTICLES * 3),
+      life: new Float32Array(MAX_PARTICLES),
+      size: new Float32Array(MAX_PARTICLES),
+      kind: new Uint8Array(MAX_PARTICLES),
+      next: 0,
     }),
     []
   );
 
-  // `age` advances a drop born partway through the frame, so drops emitted
-  // in one frame spread along the stream instead of travelling as a clump.
+  const tmp = useMemo(
+    () => ({
+      p: new THREE.Vector3(),
+      hit: new THREE.Vector3(),
+      t: new THREE.Vector3(),
+      n: new THREE.Vector3(),
+      b: new THREE.Vector3(),
+      v: new THREE.Vector3(),
+      s: new THREE.Vector3(),
+      q: new THREE.Quaternion(),
+      m: new THREE.Matrix4(),
+      ref: new THREE.Vector3(0, 0, 1),
+      up: new THREE.Vector3(0, 1, 0),
+    }),
+    []
+  );
+
   const spawn = (
     x: number, y: number, z: number,
     vx: number, vy: number, vz: number,
-    kind: number, size: number, life: number, age = 0
+    kind: number, size: number, life: number
   ) => {
-    const i = sim.next;
-    sim.next = (sim.next + 1) % MAX_DROPS;
-    const g = GRAVITY * (kind === FIZZ ? 0.85 : 1);
-    sim.pos.set(
-      [x + vx * age, y + vy * age - 0.5 * g * age * age, z + vz * age],
-      i * 3
-    );
-    sim.vel.set([vx, vy - g * age, vz], i * 3);
-    sim.kind[i] = kind;
-    sim.size[i] = size;
-    sim.life[i] = life - age;
+    const i = st.next;
+    st.next = (st.next + 1) % MAX_PARTICLES;
+    st.pos.set([x, y, z], i * 3);
+    st.vel.set([vx, vy, vz], i * 3);
+    st.kind[i] = kind;
+    st.size[i] = size;
+    st.life[i] = life;
   };
+
+  const pointAt = (t: number, out: THREE.Vector3) =>
+    out.set(
+      st.origin.x + st.velocity.x * t,
+      st.origin.y + st.velocity.y * t - 0.5 * GRAVITY * t * t,
+      st.origin.z + st.velocity.z * t
+    );
 
   useFrame((_, rawDelta) => {
     const dt = Math.min(rawDelta, 1 / 30);
-    sim.time += dt;
+    st.time += dt;
     const p = pour.current;
+    const mesh = streamMesh.current;
     const dm = dropMesh.current;
     const fm = fizzMesh.current;
-    if (!p || !dm || !fm) return;
-
-    // A jump (fast scroll, or the cup reappearing elsewhere) would otherwise
-    // smear drops along the gap between the old and new lip positions.
-    if (!sim.primed || sim.prevLip.distanceTo(p.lip) > 0.25) {
-      sim.prevLip.copy(p.lip);
-      sim.primed = true;
-    }
-    // Low-pass the lip's velocity: stepwise scrolling otherwise kicks the
-    // stream sideways in jerks and kinks the rope.
-    tmp.v.subVectors(p.lip, sim.prevLip).divideScalar(Math.max(dt, 1e-4)).clampLength(0, 3);
-    tmp.lipVel.lerp(tmp.v, 1 - Math.exp(-dt * 4));
-
-    if (p.rate > 0) {
-      sim.carry += p.rate * dt;
-      const n = Math.floor(sim.carry);
-      sim.carry -= n;
-      // A slow lateral waver so the falling rope isn't ruler-straight.
-      const waver = Math.sin(sim.time * 3.1) * 0.018 + Math.sin(sim.time * 7.3) * 0.008;
-      for (let k = 0; k < n; k++) {
-        const f = (k + Math.random()) / n;
-        const x = THREE.MathUtils.lerp(sim.prevLip.x, p.lip.x, f) + (Math.random() - 0.5) * 0.02;
-        const y = THREE.MathUtils.lerp(sim.prevLip.y, p.lip.y, f);
-        const z = THREE.MathUtils.lerp(sim.prevLip.z, p.lip.z, f) + (Math.random() - 0.5) * 0.02;
-        const speed = 0.75 + Math.random() * 0.1;
-        const roll = Math.random();
-        const kind = roll < 0.08 ? FIZZ : roll < 0.2 ? LOOSE : LIQUID;
-        // Loose drops get a sideways kick so they peel away from the rope.
-        const kick = kind === LOOSE ? 0.35 : 0;
-        spawn(
-          x, y, z,
-          p.dir.x * speed + tmp.lipVel.x * 0.15 + waver + (Math.random() - 0.5) * kick,
-          p.dir.y * speed + tmp.lipVel.y * 0.15,
-          p.dir.z * speed + waver * 0.5 + (Math.random() - 0.5) * kick,
-          kind,
-          kind === FIZZ
-            ? 0.012 + Math.random() * 0.01
-            : kind === LOOSE
-              ? 0.022 + Math.random() * 0.03
-              : 0.03 + Math.random() * 0.015,
-          3,
-          (1 - f) * dt
-        );
-      }
-    } else {
-      sim.carry = 0;
-    }
-    sim.prevLip.copy(p.lip);
-
+    if (!p || !mesh || !dm || !fm) return;
     const list = bodies.current ?? [];
 
-    for (let i = 0; i < MAX_DROPS; i++) {
-      if (sim.life[i] <= 0) continue;
-      const kind = sim.kind[i];
-      const o = i * 3;
-      sim.vel[o + 1] -= GRAVITY * (kind === FIZZ ? 0.85 : 1) * dt;
-      sim.pos[o] += sim.vel[o] * dt;
-      sim.pos[o + 1] += sim.vel[o + 1] * dt;
-      sim.pos[o + 2] += sim.vel[o + 2] * dt;
-      sim.life[i] -= dt;
-      tmp.p.set(sim.pos[o], sim.pos[o + 1], sim.pos[o + 2]);
+    // Smoothed lip velocity: liquid that left earlier left from where the
+    // lip used to be, so a moving cup trails its stream behind it.
+    if (!st.primed || st.prevLip.distanceTo(p.lip) > 0.25) {
+      st.prevLip.copy(p.lip);
+      st.primed = true;
+    }
+    tmp.v.subVectors(p.lip, st.prevLip).divideScalar(Math.max(dt, 1e-4)).clampLength(0, 2.5);
+    st.lag.lerp(tmp.v, 1 - Math.exp(-dt * 6));
+    st.prevLip.copy(p.lip);
 
-      if (tmp.p.y < -2) {
-        sim.life[i] = 0;
-        continue;
+    const on = p.rate > 0;
+    if (on) {
+      if (!st.pouring) {
+        st.pouring = true;
+        st.falling = false;
+        st.headT = 0;
+        st.tailT = 0;
       }
+      st.headT += dt;
+      // While attached, the stream hangs off the current lip.
+      st.origin.copy(p.lip);
+      st.velocity.copy(p.dir).multiplyScalar(EXIT_SPEED).sub(st.lag);
+    } else if (st.pouring) {
+      // Flow stopped: freeze the path and let the tail detach and fall.
+      st.pouring = false;
+      st.falling = true;
+      st.tailT = 0;
+    }
+    if (st.falling) {
+      st.headT += dt;
+      st.tailT += dt;
+    }
 
-      // Drops that reach a variable are absorbed into it; a few splash back.
-      if (kind !== SPLASH) {
-        for (const b of list) {
-          if (b.r < 0.08) continue;
-          if (tmp.p.distanceToSquared(b.pos) < b.r * b.r) {
-            sim.life[i] = 0;
-            b.impulse = Math.min(b.impulse + 0.006, 0.14);
-            if ((kind === LIQUID || kind === LOOSE) && Math.random() < 0.16) {
-              tmp.v.subVectors(tmp.p, b.pos).normalize();
-              for (let k = 0; k < 3; k++) {
-                spawn(
-                  tmp.p.x, tmp.p.y, tmp.p.z,
-                  tmp.v.x * 1.3 + (Math.random() - 0.5) * 1.1,
-                  Math.abs(tmp.v.y) * 1.1 + 1.1 + Math.random(),
-                  tmp.v.z * 1.3 + (Math.random() - 0.5) * 1.1,
-                  SPLASH,
-                  0.014 + Math.random() * 0.016,
-                  0.5
-                );
-              }
-            }
-            break;
-          }
+    // March down the path to find where it lands.
+    let tHit = 1.4;
+    let hitBody: Body | null = null;
+    for (let t = 0; t <= 1.4; t += 0.006) {
+      pointAt(t, tmp.p);
+      if (tmp.p.y < -2.2) {
+        tHit = t;
+        break;
+      }
+      let found = false;
+      for (const b of list) {
+        if (b.r >= 0.08 && tmp.p.distanceToSquared(b.pos) < b.r * b.r) {
+          hitBody = b;
+          found = true;
+          break;
         }
+      }
+      if (found) {
+        tHit = t;
+        break;
       }
     }
 
-    // Walk liquid drops newest to oldest, sampling a spine every ~3.5cm and
-    // starting a new segment wherever the stream has broken apart.
-    sim.inRope.fill(0);
-    let count = 0;
-    let seg = 0;
-    let lastX = 0, lastY = 0, lastZ = 0;
-    let open = false;
-    let segStart = 0;
-    const closeSegment = () => {
-      // Too short to read as a stream: leave those drops as droplets.
-      if (count - segStart < 3) {
-        for (let k = segStart; k < count; k++) {
-          for (let j = 0; j < 8; j++) {
-            const idx = rope.members[k * 8 + j];
-            if (idx >= 0) sim.inRope[idx] = 0;
-          }
-        }
-        count = segStart;
-      } else {
-        seg++;
-      }
-      open = false;
-    };
-    for (let k = 0; k < MAX_DROPS && count < SPINE; k++) {
-      const i = (sim.next - 1 - k + MAX_DROPS) % MAX_DROPS;
-      if (sim.kind[i] !== LIQUID) continue;
-      const o = i * 3;
-      if (sim.life[i] <= 0) {
-        if (open) closeSegment();
-        continue;
-      }
-      const x = sim.pos[o], y = sim.pos[o + 1], z = sim.pos[o + 2];
-      const d2 = (x - lastX) ** 2 + (y - lastY) ** 2 + (z - lastZ) ** 2;
-      if (open && d2 > 0.3 * 0.3) closeSegment();
-      if (!open || d2 > 0.035 * 0.035) {
-        if (!open) {
-          open = true;
-          segStart = count;
-        }
-        const speed = Math.hypot(sim.vel[o], sim.vel[o + 1], sim.vel[o + 2]);
-        rope.px[count] = x;
-        rope.py[count] = y;
-        rope.pz[count] = z;
-        // Continuity: a stream narrows as it accelerates.
-        rope.pr[count] = 0.085 / Math.sqrt(1 + 0.45 * speed);
-        rope.seg[count] = seg;
-        rope.members.fill(-1, count * 8, count * 8 + 8);
-        rope.members[count * 8] = i;
-        count++;
-        lastX = x; lastY = y; lastZ = z;
-      } else {
-        const slot = count - 1;
-        for (let j = 1; j < 8; j++) {
-          if (rope.members[slot * 8 + j] < 0) {
-            rope.members[slot * 8 + j] = i;
-            break;
-          }
+    const tStart = st.pouring ? 0 : st.tailT;
+    const tEnd = Math.min(st.headT, tHit);
+    const visible = (st.pouring || st.falling) && tEnd - tStart > 0.004;
+    if (st.falling && tStart >= tHit) st.falling = false;
+    mesh.visible = visible;
+
+    if (visible) {
+      const pos = tube.position.array as Float32Array;
+      const nor = tube.normal.array as Float32Array;
+      const span = tEnd - tStart;
+      const headFree = st.headT < tHit;
+      for (let i = 0; i <= STREAM_SEGMENTS; i++) {
+        const u = i / STREAM_SEGMENTS;
+        const t = tStart + span * u;
+        pointAt(t, tmp.p);
+        tmp.t.set(st.velocity.x, st.velocity.y - GRAVITY * t, st.velocity.z);
+        const speed = tmp.t.length();
+        tmp.t.normalize();
+        if (Math.abs(tmp.t.dot(tmp.ref)) > 0.95) tmp.ref.set(1, 0, 0);
+        else tmp.ref.set(0, 0, 1);
+        tmp.n.crossVectors(tmp.t, tmp.ref).normalize();
+        tmp.b.crossVectors(tmp.t, tmp.n);
+
+        // Continuity: the stream thins as it speeds up. A gentle travelling
+        // ripple keeps it from looking like a rod.
+        let r = 0.075 / Math.sqrt(1 + 0.55 * speed);
+        const ripple = Math.sin(t * 38 - st.time * 16) * 0.012 * Math.min(1, t * 6);
+        tmp.p.addScaledVector(tmp.n, ripple);
+        // Rounded falling head and a pinched detaching tail.
+        if (headFree) r *= Math.sqrt(Math.max(0, 1 - Math.pow(Math.max(0, (u - 0.88) / 0.12), 2)));
+        if (st.falling) r *= Math.min(1, u * 8);
+        if (i === STREAM_SEGMENTS && headFree) r = 0;
+
+        for (let a = 0; a < STREAM_RADIAL; a++) {
+          const ang = (a / STREAM_RADIAL) * Math.PI * 2;
+          const c = Math.cos(ang), s = Math.sin(ang);
+          const nx = tmp.n.x * c + tmp.b.x * s;
+          const ny = tmp.n.y * c + tmp.b.y * s;
+          const nz = tmp.n.z * c + tmp.b.z * s;
+          const v = (i * STREAM_RADIAL + a) * 3;
+          pos[v] = tmp.p.x + nx * r;
+          pos[v + 1] = tmp.p.y + ny * r;
+          pos[v + 2] = tmp.p.z + nz * r;
+          nor[v] = nx;
+          nor[v + 1] = ny;
+          nor[v + 2] = nz;
         }
       }
-      sim.inRope[i] = 1;
-    }
-    if (open) closeSegment();
+      tube.position.needsUpdate = true;
+      tube.normal.needsUpdate = true;
 
-    // Two passes of neighbour averaging smooth out per-frame emission jitter
-    // while keeping each segment's ends pinned (lip and impact point).
-    for (let pass = 0; pass < 2; pass++) {
-      for (let k = 1; k < count - 1; k++) {
-        if (rope.seg[k - 1] !== rope.seg[k] || rope.seg[k + 1] !== rope.seg[k]) continue;
-        rope.px[k] = (rope.px[k - 1] + rope.px[k] * 2 + rope.px[k + 1]) / 4;
-        rope.py[k] = (rope.py[k - 1] + rope.py[k] * 2 + rope.py[k + 1]) / 4;
-        rope.pz[k] = (rope.pz[k - 1] + rope.pz[k] * 2 + rope.pz[k + 1]) / 4;
-      }
-    }
-
-    const pos = rope.position.array as Float32Array;
-    const nor = rope.normal.array as Float32Array;
-    const idx = rope.index.array as Uint16Array;
-    let tri = 0;
-    for (let k = 0; k < count; k++) {
-      const prev = k > 0 && rope.seg[k - 1] === rope.seg[k] ? k - 1 : k;
-      const next = k < count - 1 && rope.seg[k + 1] === rope.seg[k] ? k + 1 : k;
-      tmp.t.set(
-        rope.px[next] - rope.px[prev],
-        rope.py[next] - rope.py[prev],
-        rope.pz[next] - rope.pz[prev]
-      );
-      if (tmp.t.lengthSq() < 1e-8) tmp.t.set(0, -1, 0);
-      tmp.t.normalize();
-      tmp.ref.set(0, 0, 1);
-      if (Math.abs(tmp.t.dot(tmp.ref)) > 0.9) tmp.ref.set(1, 0, 0);
-      tmp.n.crossVectors(tmp.t, tmp.ref).normalize();
-      tmp.b.crossVectors(tmp.t, tmp.n);
-
-      // Taper the far end so the stream finishes in a point, not a stump.
-      let fromEnd = 0;
-      while (k + fromEnd + 1 < count && rope.seg[k + fromEnd + 1] === rope.seg[k] && fromEnd < 3) fromEnd++;
-      const r = rope.pr[k] * (0.35 + 0.65 * (fromEnd / 3));
-
-      for (let a = 0; a < RADIAL; a++) {
-        const ang = (a / RADIAL) * Math.PI * 2;
-        const c = Math.cos(ang), s = Math.sin(ang);
-        const nx = tmp.n.x * c + tmp.b.x * s;
-        const ny = tmp.n.y * c + tmp.b.y * s;
-        const nz = tmp.n.z * c + tmp.b.z * s;
-        const v = (k * RADIAL + a) * 3;
-        pos[v] = rope.px[k] + nx * r;
-        pos[v + 1] = rope.py[k] + ny * r;
-        pos[v + 2] = rope.pz[k] + nz * r;
-        nor[v] = nx;
-        nor[v + 1] = ny;
-        nor[v + 2] = nz;
+      // Where the stream is actually landing, splash and push the variable.
+      const landing = st.headT >= tHit && tStart < tHit;
+      if (landing && hitBody) {
+        pointAt(tHit, tmp.hit);
+        hitBody.impulse = Math.min(hitBody.impulse + dt * 0.6, 0.14);
+        st.splashCarry += 55 * dt;
+        const n = Math.floor(st.splashCarry);
+        st.splashCarry -= n;
+        tmp.n.subVectors(tmp.hit, hitBody.pos).normalize();
+        for (let k = 0; k < n; k++) {
+          const spread = 0.9 + Math.random() * 0.9;
+          const ang = Math.random() * Math.PI * 2;
+          spawn(
+            tmp.hit.x, tmp.hit.y, tmp.hit.z,
+            tmp.n.x * spread + Math.cos(ang) * 0.9,
+            Math.abs(tmp.n.y) * spread * 0.6 + 0.9 + Math.random() * 0.8,
+            tmp.n.z * spread + Math.sin(ang) * 0.9,
+            SPLASH,
+            0.012 + Math.random() * 0.02,
+            0.45 + Math.random() * 0.2
+          );
+        }
       }
 
-      if (next !== k) {
-        for (let a = 0; a < RADIAL; a++) {
-          const a2 = (a + 1) % RADIAL;
-          const i0 = k * RADIAL + a;
-          const i1 = k * RADIAL + a2;
-          const i2 = next * RADIAL + a;
-          const i3 = next * RADIAL + a2;
-          idx[tri++] = i0; idx[tri++] = i1; idx[tri++] = i2;
-          idx[tri++] = i1; idx[tri++] = i3; idx[tri++] = i2;
+      // Fizz rides the stream: bubbles leave the lip on the same path.
+      if (st.pouring) {
+        st.fizzCarry += 26 * dt;
+        const n = Math.floor(st.fizzCarry);
+        st.fizzCarry -= n;
+        for (let k = 0; k < n; k++) {
+          spawn(
+            st.origin.x + (Math.random() - 0.5) * 0.04,
+            st.origin.y,
+            st.origin.z + (Math.random() - 0.5) * 0.04,
+            st.velocity.x + (Math.random() - 0.5) * 0.06,
+            st.velocity.y,
+            st.velocity.z + (Math.random() - 0.5) * 0.06,
+            FIZZ,
+            0.01 + Math.random() * 0.01,
+            1.4
+          );
         }
       }
     }
-    rope.geometry.setDrawRange(0, tri);
-    rope.position.needsUpdate = true;
-    rope.normal.needsUpdate = true;
-    rope.index.needsUpdate = true;
 
     let dropCount = 0;
     let fizzCount = 0;
-    for (let i = 0; i < MAX_DROPS; i++) {
-      if (sim.life[i] <= 0 || sim.inRope[i]) continue;
-      const kind = sim.kind[i];
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+      if (st.life[i] <= 0) continue;
       const o = i * 3;
-      tmp.p.set(sim.pos[o], sim.pos[o + 1], sim.pos[o + 2]);
-      tmp.v.set(sim.vel[o], sim.vel[o + 1], sim.vel[o + 2]);
+      const kind = st.kind[i];
+      st.vel[o + 1] -= GRAVITY * dt;
+      st.pos[o] += st.vel[o] * dt;
+      st.pos[o + 1] += st.vel[o + 1] * dt;
+      st.pos[o + 2] += st.vel[o + 2] * dt;
+      st.life[i] -= dt;
+      tmp.p.set(st.pos[o], st.pos[o + 1], st.pos[o + 2]);
+      if (tmp.p.y < -2.2) {
+        st.life[i] = 0;
+        continue;
+      }
+      if (kind === FIZZ) {
+        let absorbed = false;
+        for (const b of list) {
+          if (b.r >= 0.08 && tmp.p.distanceToSquared(b.pos) < b.r * b.r) {
+            absorbed = true;
+            break;
+          }
+        }
+        if (absorbed) {
+          st.life[i] = 0;
+          continue;
+        }
+      }
+      tmp.v.set(st.vel[o], st.vel[o + 1], st.vel[o + 2]);
       const speed = tmp.v.length();
       if (speed > 1e-4) tmp.q.setFromUnitVectors(tmp.up, tmp.v.divideScalar(speed));
-      const r = sim.size[i];
-      const stretch = kind === FIZZ ? 1 : 1 + Math.min(speed * 0.2, 1.2);
-      tmp.s.set(r, r * stretch, r);
+      const r = st.size[i];
+      // Splash drops shrink as they fly off so they don't pop out of view.
+      const fade = kind === SPLASH ? Math.min(1, st.life[i] * 4) : 1;
+      const stretch = kind === SPLASH ? 1 + Math.min(speed * 0.25, 1) : 1;
+      tmp.s.set(r * fade, r * fade * stretch, r * fade);
       tmp.m.compose(tmp.p, tmp.q, tmp.s);
       if (kind === FIZZ) fm.setMatrixAt(fizzCount++, tmp.m);
       else dm.setMatrixAt(dropCount++, tmp.m);
@@ -887,14 +853,14 @@ function Stream({
 
   return (
     <>
-      <mesh geometry={rope.geometry} frustumCulled={false}>
+      <mesh ref={streamMesh} geometry={tube.geometry} frustumCulled={false} visible={false}>
         <meshPhysicalMaterial {...liquidLook} side={THREE.DoubleSide} />
       </mesh>
-      <instancedMesh ref={dropMesh} args={[undefined, undefined, MAX_DROPS]} count={0} frustumCulled={false}>
+      <instancedMesh ref={dropMesh} args={[undefined, undefined, MAX_PARTICLES]} count={0} frustumCulled={false}>
         <sphereGeometry args={[1, 12, 10]} />
         <meshPhysicalMaterial {...liquidLook} />
       </instancedMesh>
-      <instancedMesh ref={fizzMesh} args={[undefined, undefined, MAX_DROPS]} count={0} frustumCulled={false}>
+      <instancedMesh ref={fizzMesh} args={[undefined, undefined, MAX_PARTICLES]} count={0} frustumCulled={false}>
         <sphereGeometry args={[1, 8, 6]} />
         <meshStandardMaterial
           color="#FFF6E2"
