@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Check, Copy } from "lucide-react";
-import { AVAILABLE_MODELS, PROMPT_IDEAS } from "./GenerateModule.model";
+import { PROMPT_IDEAS } from "./GenerateModule.model";
+import { findModel, modelGroups } from "@/services/llm/models";
 import { SCMGraph } from "@/components/Molecules/SCMGraph/SCMGraph";
 import { Prose } from "@/components/Molecules/Prose/Prose";
 import { GenerateModuleViewProps } from "./GenerateModule.types";
@@ -22,8 +23,7 @@ const Notation = ({ text }: { text: string }) => (
   </>
 );
 
-const modelName = (id?: string) =>
-  AVAILABLE_MODELS.find((m) => m.id === id)?.name ?? id ?? "Claude";
+const modelName = (id?: string) => (id && findModel(id)?.label) ?? id ?? "Unknown model";
 
 export const GenerateModuleView = ({
   prompt,
@@ -32,6 +32,7 @@ export const GenerateModuleView = ({
   generatedSCMs,
   selectedModel,
   setSelectedModel,
+  available,
   error,
   generateSCMs,
   copyToClipboard,
@@ -73,32 +74,64 @@ export const GenerateModuleView = ({
         <div className="space-y-6">
           <fieldset>
             <legend className="field-label">Model that writes it</legend>
-            <div className="space-y-2" role="radiogroup">
-              {AVAILABLE_MODELS.map((model) => {
-                const on = selectedModel === model.id;
-                return (
-                  <button
-                    key={model.id}
-                    role="radio"
-                    aria-checked={on}
-                    onClick={() => setSelectedModel(model.id)}
-                    className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left font-semibold transition-colors ${
-                      on
-                        ? "border-cobalt bg-white text-ink"
-                        : "border-glaze bg-white/40 text-ink-faint hover:border-ink-faint"
-                    }`}
+            <div
+              className="max-h-[30rem] space-y-5 overflow-y-auto pr-1"
+              role="radiogroup"
+              data-lenis-prevent
+            >
+              {modelGroups(available).map((group) =>
+                group.enabled ? (
+                  <div key={group.provider}>
+                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-faint">
+                      {group.label}
+                    </h4>
+                    <div className="space-y-1.5">
+                      {group.models.map((model) => {
+                        const on = selectedModel === model.id;
+                        return (
+                          <button
+                            key={model.id}
+                            role="radio"
+                            aria-checked={on}
+                            onClick={() => setSelectedModel(model.id)}
+                            className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-2.5 text-left font-semibold transition-colors ${
+                              on
+                                ? "border-cobalt bg-white text-ink"
+                                : "border-glaze bg-white/40 text-ink-faint hover:border-ink-faint"
+                            }`}
+                          >
+                            <span
+                              className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${
+                                on ? "border-cobalt" : "border-glaze"
+                              }`}
+                            >
+                              {on && <span className="h-2 w-2 rounded-full bg-cobalt" />}
+                            </span>
+                            <span>
+                              {model.label}
+                              <span className="block text-xs font-normal text-ink-faint">
+                                {model.limits}
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <p
+                    key={group.provider}
+                    className="rounded-2xl border border-dashed border-glaze px-4 py-2.5 text-sm text-ink-faint"
                   >
-                    <span
-                      className={`grid h-5 w-5 place-items-center rounded-full border-2 ${
-                        on ? "border-cobalt" : "border-glaze"
-                      }`}
-                    >
-                      {on && <span className="h-2 w-2 rounded-full bg-cobalt" />}
+                    <span className="font-semibold text-ink-soft">{group.label}</span>
+                    {" · "}
+                    {group.models.length} {group.models.length === 1 ? "model" : "models"}
+                    <span className="block text-xs">
+                      Add {group.missingEnv.join(" + ")} to enable
                     </span>
-                    {model.name}
-                  </button>
-                );
-              })}
+                  </p>
+                )
+              )}
             </div>
           </fieldset>
 

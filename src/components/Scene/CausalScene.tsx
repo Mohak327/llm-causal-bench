@@ -239,7 +239,20 @@ const HANDLE_PATH = new THREE.CatmullRomCurve3([
 ]);
 
 const BUBBLES = 44;
-const HERO_CUP = new THREE.Vector3(1.7, 0.2, 0);
+const HERO_CUP = new THREE.Vector3(0.75, 0.42, 0);
+const HERO_SCALE = 1.9;
+// How far the cup (with its handle) reaches above/below its centre, per unit
+// of scale, in its hero pose.
+const HERO_EXTENT = 0.8;
+
+// Document-space top/bottom of an element, ignoring scroll and transforms.
+const pageTop = (el: HTMLElement) => {
+  let y = 0;
+  for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) {
+    y += n.offsetTop;
+  }
+  return y;
+};
 const POUR_HEIGHT = 2.75;
 const STEP3_LIP = new THREE.Vector3(-1.1, 1.75, 0.3);
 
@@ -263,6 +276,8 @@ function Cup({
   const bubbleMesh = useRef<THREE.InstancedMesh>(null);
   const sparkles = useRef<THREE.Object3D>(null);
   const spinAngle = useRef(0);
+  const heroPose = useRef({ y: HERO_CUP.y, scale: HERO_SCALE });
+  const { size, viewport } = useThree();
   const slosh = useRef({ w: 0, v: 0, prevTilt: 0 });
 
   const glaze = useMemo(() => makeGlaze(), []);
@@ -370,12 +385,36 @@ function Cup({
         THREE.MathUtils.lerp(1.0, POUR_TILT, tip) *
         (1 - smooth(ramp(s, SWEEP_END, SWEEP_END + 0.08)));
       lean = THREE.MathUtils.lerp(0.5, 0.2, approach);
-      scale = THREE.MathUtils.lerp(1.45, 0.8, approach) * (1 - exit);
+
+      // Fit the hero cup into the free band between the nav and the text
+      // below it. Text scales with page width but the scene with its height,
+      // so this is measured from the real layout rather than hard-coded.
+      const hero = heroPose.current;
+      const rig = o.parent;
+      const wide = size.width >= 768;
+      const floorEl = document.querySelector<HTMLElement>(
+        `[data-cup-floor="${wide ? "wide" : "narrow"}"]`
+      );
+      const ceilEl = document.querySelector<HTMLElement>("[data-cup-ceiling]");
+      if (rig && floorEl && ceilEl && s < 0.45) {
+        const unit = viewport.height / size.height;
+        const floorPx = pageTop(floorEl) - 12;
+        const ceilPx = pageTop(ceilEl) + ceilEl.offsetHeight + 12;
+        tmp.aimLip.set(0, (size.height / 2 - floorPx) * unit, 0);
+        rig.worldToLocal(tmp.aimLip);
+        const lo = tmp.aimLip.y;
+        tmp.aimLip.set(0, (size.height / 2 - ceilPx) * unit, 0);
+        rig.worldToLocal(tmp.aimLip);
+        const hi = tmp.aimLip.y;
+        hero.scale = THREE.MathUtils.clamp((hi - lo) / (2 * HERO_EXTENT), 0.6, HERO_SCALE);
+        hero.y = (hi + lo) / 2;
+      }
+      scale = THREE.MathUtils.lerp(hero.scale, 0.8, approach) * (1 - exit);
 
       const off = lipOffset(POUR_TILT, 0.8, 0.2);
       o.position.set(
         THREE.MathUtils.lerp(HERO_CUP.x, lipX - off.x, approach),
-        THREE.MathUtils.lerp(HERO_CUP.y, POUR_HEIGHT, approach) + exit * 1.6,
+        THREE.MathUtils.lerp(hero.y, POUR_HEIGHT, approach) + exit * 1.6,
         0
       );
       let poured = 0;

@@ -1,10 +1,3 @@
-// Available models for generation
-export const AVAILABLE_MODELS = [
-  { id: "claude", name: "Claude Sonnet 4.5" },
-  { id: "gpt4", name: "GPT-4" },
-  { id: "gemini", name: "Gemini 2.5 Flash" },
-];
-
 export const PROMPT_IDEAS = [
   "A patient's medication dosage, blood pressure and recovery",
   "Oven temperature, baking time and cake texture",
@@ -33,7 +26,7 @@ export const DUMMY_SCMS = [
     M: "P(T_{A=low_dose} | T=t)",
     S: "With low-dose medication, the blood pressure reduction would be minimal, resulting in less significant health improvements.",
     timestamp: new Date(Date.now() - 3600000).toISOString(),
-    generatedBy: "claude",
+    generatedBy: "gemini-3.8-flash",
   },
   {
     id: 1735983600000,
@@ -56,6 +49,6 @@ export const DUMMY_SCMS = [
     M: "P(T_{A=2_hours} | T=t)",
     S: "With only 2 hours of daily study, the test preparation would be inadequate, leading to a lower exam score and a C grade.",
     timestamp: new Date(Date.now() - 7200000).toISOString(),
-    generatedBy: "gpt4",
+    generatedBy: "gpt-oss-120b",
   },
 ];

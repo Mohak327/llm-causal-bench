@@ -1,57 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMService } from '@/services/llm/LLMService';
+import {
+  complete,
+  httpStatusOf,
+  parseJsonObject,
+  parseUserKeys,
+  pickJudge,
+} from '@/services/llm/LLMService';
+import { KEYS_HEADER } from '@/services/llm/models';
 
 export async function POST(request: NextRequest) {
+  const { prompt, gradedModel } = await request.json();
+
+  if (!prompt) {
+    return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+  }
+
   try {
-    const { prompt, model } = await request.json();
-
-    if (!prompt) {
-      return NextResponse.json(
-        { error: 'Prompt is required' },
-        { status: 400 }
-      );
-    }
-
-    // Use LLM to evaluate the response
-    const response = await LLMService.call(
-      model || 'claude',
-      [{ role: 'user', content: prompt }],
-      1000
+    // A judge from another model family, so no model grades its own answers.
+    // The user's keys pay for judging when they cover a judge model.
+    const userKeys = parseUserKeys(request.headers.get(KEYS_HEADER));
+    const judge = pickJudge(gradedModel, userKeys);
+    const response = await complete(
+      judge.id,
+      {
+        messages: [{ role: 'user', content: prompt }],
+        maxTokens: 2048,
+        json: true,
+      },
+      userKeys
     );
 
-    // Parse the JSON from the evaluator's response
-    let analysis;
-    try {
-      const jsonMatch = response.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        analysis = JSON.parse(jsonMatch[0]);
-      } else {
-        analysis = JSON.parse(response.text);
-      }
-      
-      // Calculate ECR (Expected Calibration Error)
-      analysis.ecr = (1 - analysis.accuracy) * 0.5;
-      
-    } catch (parseError) {
+    const raw = parseJsonObject(response.text);
+    const { errorType, accuracy, reasoning, hallucination } = raw;
+    if (
+      !Number.isInteger(errorType) || (errorType as number) < 0 || (errorType as number) > 3 ||
+      typeof accuracy !== 'number' ||
+      typeof reasoning !== 'string' ||
+      typeof hallucination !== 'boolean'
+    ) {
       return NextResponse.json(
-        { 
-          error: 'Failed to parse evaluation',
-          rawResponse: response.text 
-        },
-        { status: 500 }
+        { error: 'The judge returned a malformed grade', rawResponse: response.text },
+        { status: 502 }
       );
     }
 
     return NextResponse.json({
-      success: true,
-      analysis
+      analysis: {
+        errorType,
+        accuracy: Math.min(1, Math.max(0, accuracy)),
+        reasoning,
+        hallucination,
+        judge: judge.id,
+      },
     });
-
-  } catch (error: any) {
+  } catch (error) {
     console.error('Evaluation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to evaluate response' },
-      { status: 500 }
+      { error: error instanceof Error ? error.message : 'Failed to evaluate response' },
+      { status: httpStatusOf(error) }
     );
   }
 }

@@ -15,9 +15,11 @@ const GITHUB_URL = "https://github.com/Mohak327/llm-causal-bench";
 export const Hero = ({
   progress,
   reduced,
+  onHow,
 }: {
   progress: MotionValue<number>;
   reduced: boolean;
+  onHow?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) => {
   const weightIn = useMotionValue(reduced ? 760 : 200);
 
@@ -40,8 +42,9 @@ export const Hero = ({
   const fade = useTransform(progress, [0, 0.55], [1, 0]);
 
   return (
-    <section className="relative z-10 flex h-[100svh] flex-col px-6 pb-10 pt-7 sm:px-14 sm:pb-14 sm:pt-9 lg:px-20">
+    <section className="relative z-10 flex h-[100svh] flex-col px-4 pb-10 pt-7 sm:px-14 sm:pb-14 sm:pt-9 lg:px-16">
       <motion.nav
+        data-cup-ceiling
         className="flex items-center justify-between"
         initial={reduced ? false : { opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -49,12 +52,12 @@ export const Hero = ({
         style={{ opacity: fade }}
         suppressHydrationWarning
       >
-        <a href="#top" className="flex items-center gap-2.5 text-xl font-bold tracking-[-0.02em]">
-          <LogoMark className="h-10 w-10" />
+        <a href="#top" className="flex shrink-0 items-center gap-2 text-xl font-bold sm:gap-2.5 sm:text-2xl tracking-[-0.02em]">
+          <LogoMark className="h-8 w-8 sm:h-10 sm:w-10" />
           Causalitea
         </a>
-        <div className="flex items-center gap-1 text-base font-semibold text-ink-soft sm:gap-3 sm:text-lg">
-          <a href="#how" className="rounded-full px-3 py-2 hover:text-cobalt">
+        <div className="flex items-center gap-0 whitespace-nowrap text-[15px] font-semibold text-ink-soft sm:gap-3 sm:text-lg">
+          <a href="#how" onClick={onHow} className="rounded-full px-3 py-2 hover:text-cobalt">
             How it works
           </a>
           <a href="#lab" className="rounded-full px-3 py-2 hover:text-cobalt">
@@ -73,6 +76,7 @@ export const Hero = ({
 
       <div className="mt-auto">
         <motion.div
+          data-cup-floor="narrow"
           className="max-w-xl pb-8 sm:pb-10"
           initial={reduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -89,13 +93,14 @@ export const Hero = ({
             <a href="#lab" className="btn-primary">
               Run a test
             </a>
-            <a href="#how" className="btn-quiet px-8 py-4 text-lg">
+            <a href="#how" onClick={onHow} className="btn-quiet px-8 py-4 text-lg">
               See how it works
             </a>
           </div>
         </motion.div>
 
         <motion.h1
+          data-cup-floor="wide"
           aria-label="Causalitea"
           className="select-none whitespace-nowrap text-[clamp(3.4rem,19.4vw,24rem)] leading-[0.82] tracking-[-0.045em] text-ink"
           style={{ fontVariationSettings: variation, y: headlineY, opacity: fade }}

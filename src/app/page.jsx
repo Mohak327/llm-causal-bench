@@ -8,7 +8,7 @@ import {
   useScroll,
   useTransform,
 } from "motion/react";
-import { ReactLenis } from "lenis/react";
+import { ReactLenis, useLenis } from "lenis/react";
 import { Hero } from "@/components/Landing/Hero";
 import { Story } from "@/components/Landing/Story";
 import { Lab } from "@/components/Landing/Lab";
@@ -53,6 +53,33 @@ export default function Home() {
     setSceneActive(v < 0.99);
   });
 
+  // Scroll offset at which `stage` reaches s (inverse of the transform above).
+  const scrollForStage = (s) => {
+    const hero = heroRef.current;
+    const story = storyRef.current;
+    if (s <= 1) return hero.offsetTop + s * hero.offsetHeight;
+    return story.offsetTop + ((s - 1) / 5) * (story.offsetHeight - window.innerHeight);
+  };
+
+  // Jumping straight to #how skips the pour, so scroll down to just before it
+  // starts, then play it through at a steady pace to the end of the sweep.
+  const lenis = useLenis();
+  const playHow = (e) => {
+    if (!lenis || !heroRef.current || !storyRef.current) return;
+    e.preventDefault();
+    // Keep Lenis's own anchor handler (on window) from overriding this.
+    e.nativeEvent.stopPropagation();
+    lenis.scrollTo(scrollForStage(0.42), {
+      duration: 1.2,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+      onComplete: () =>
+        lenis.scrollTo(scrollForStage(1.88), {
+          duration: 5.5,
+          easing: (t) => t * t * (3 - 2 * t),
+        }),
+    });
+  };
+
   return (
     <main id="top">
       {!reduced && <ReactLenis root options={{ lerp: 0.1, anchors: true }} />}
@@ -72,7 +99,7 @@ export default function Home() {
       </motion.div>
 
       <div ref={heroRef}>
-        <Hero progress={heroProgress} reduced={reduced} />
+        <Hero progress={heroProgress} reduced={reduced} onHow={playHow} />
       </div>
       <Story ref={storyRef} step={step} progress={storyProgress} reduced={reduced} />
       <Lab ref={labRef} reduced={reduced} />

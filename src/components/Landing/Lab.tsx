@@ -1,12 +1,16 @@
 "use client";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { TestModule } from "@/components/Organisms/TestModule/TestModule.controller";
 import { GenerateModule } from "@/components/Organisms/GenerateModule/GenerateModule.controller";
+import { KeysModule } from "@/components/Organisms/KeysModule/KeysModule";
+import { useKeyVault } from "@/services/llm/keyVault";
+import { loadAvailableModels, modelsUnlockedBy } from "@/services/llm/models";
 
 const TABS = [
   { id: "test", label: "Test models" },
   { id: "generate", label: "Generate benchmarks" },
+  { id: "keys", label: "My keys" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -14,6 +18,21 @@ type TabId = (typeof TABS)[number]["id"];
 export const Lab = forwardRef<HTMLElement, { reduced: boolean }>(
   ({ reduced }, ref) => {
     const [tab, setTab] = useState<TabId>("test");
+    // Held here so unlocked keys survive switching tabs.
+    const vault = useKeyVault();
+    const [serverAvailable, setServerAvailable] = useState<string[] | null>(null);
+
+    useEffect(() => {
+      loadAvailableModels().then(setServerAvailable);
+    }, []);
+
+    // Models the site's keys cover, plus any the user's own keys unlock.
+    const available = useMemo(
+      () =>
+        serverAvailable &&
+        Array.from(new Set([...serverAvailable, ...modelsUnlockedBy(vault.keys)])),
+      [serverAvailable, vault.keys]
+    );
 
     return (
       <section
@@ -80,7 +99,13 @@ export const Lab = forwardRef<HTMLElement, { reduced: boolean }>(
                 exit={{ opacity: 0, y: reduced ? 0 : -10 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                {tab === "test" ? <TestModule /> : <GenerateModule />}
+                {tab === "test" ? (
+                  <TestModule available={available} userKeys={vault.keys} />
+                ) : tab === "generate" ? (
+                  <GenerateModule available={available} userKeys={vault.keys} />
+                ) : (
+                  <KeysModule vault={vault} serverAvailable={serverAvailable} />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>

@@ -1,14 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { keysHeader, type UserKeys } from "@/services/llm/keyVault";
+import { DEFAULT_GENERATE_MODEL } from "@/services/llm/models";
 import { DUMMY_SCMS } from "./GenerateModule.model";
 import { GenerateModuleView } from "./GenerateModule.view";
 
-export const GenerateModule = () => {
+export const GenerateModule = ({
+  available,
+  userKeys,
+}: {
+  // Models the site's or the user's keys can run; null while loading.
+  available: string[] | null;
+  userKeys: UserKeys;
+}) => {
   const [prompt, setPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatedSCMs, setGeneratedSCMs] = useState<any[]>([]);
-  const [selectedModel, setSelectedModel] = useState("claude");
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_GENERATE_MODEL);
   const [error, setError] = useState("");
+
+  // Fall back to the first runnable model if the selected one lost its key.
+  useEffect(() => {
+    if (available) {
+      setSelectedModel((prev) => (available.includes(prev) ? prev : available[0] ?? prev));
+    }
+  }, [available]);
 
   const loadDummyData = () => {
     setGeneratedSCMs(DUMMY_SCMS);
@@ -24,6 +40,7 @@ export const GenerateModule = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...keysHeader(userKeys),
         },
         body: JSON.stringify({
           prompt,
@@ -69,6 +86,7 @@ export const GenerateModule = () => {
       generatedSCMs={generatedSCMs}
       selectedModel={selectedModel}
       setSelectedModel={setSelectedModel}
+      available={available}
       error={error}
       generateSCMs={generateSCMs}
       copyToClipboard={copyToClipboard}
