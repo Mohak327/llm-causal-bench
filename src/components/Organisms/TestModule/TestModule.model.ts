@@ -1,9 +1,9 @@
 // Error type definitions
 export const ERROR_TYPES = [
-  { code: 0, name: "No Error", color: "text-emerald-400" },
-  { code: 1, name: "Not Changing Downstream Variables", color: "text-red-400" },
-  { code: 2, name: "Changing Upstream Variables", color: "text-orange-400" },
-  { code: 3, name: "Correlation Effect", color: "text-yellow-400" },
+  { code: 0, name: "No error", color: "bg-leaf-mist text-leaf" },
+  { code: 1, name: "Missed the ripple (Type I)", color: "bg-kiln-mist text-kiln" },
+  { code: 2, name: "Rewrote the past (Type II)", color: "bg-tea-mist text-tea-deep" },
+  { code: 3, name: "Guessed by association (Type III)", color: "bg-cobalt-mist text-cobalt" },
 ];
 
 // Sample data structure
@@ -22,35 +22,31 @@ export const SAMPLE_SCM = {
   S: "A drought depleted soil moisture, causing crop failure.",
 };
 
-// Available models for testing
-export const AVAILABLE_MODELS = [
-  { id: "claude", name: "Claude Sonnet 4.5", color: "bg-orange-500" },
-  { id: "gpt4", name: "GPT-4", color: "bg-green-500" },
-  { id: "gemini", name: "Gemini 2.5 Flash", color: "bg-blue-500" },
-  { id: "llama", name: "Llama 3", color: "bg-purple-500" },
-];
-
 // Dummy data for testing UI
 export const DUMMY_RESPONSES = [
   {
-    model: "claude",
+    model: "gemini-3.5-flash-lite",
     response:
       "A drought would have depleted soil moisture significantly, leading to reduced water availability for crops and ultimately causing crop failure or substantially reduced yields.",
     accuracy: 0.92,
     latency: 1243,
-    tokenCount: 42,
-    ecr: 0.0845,
+    outputTokens: 42,
     errorType: 0,
     hallucination: false,
+    judge: "gemma-4-31b",
+    reasoning:
+      "Propagates the drought through the whole chain: less rain, drier soil, failed harvest. Nothing upstream of rainfall was changed.",
   },
   {
-    model: "gpt4",
+    model: "gpt-oss-120b",
     response:
       "If there was a drought instead, the rainfall (A) would be minimal. This would reduce soil moisture (B) dramatically, which in turn would severely decrease crop yield (C), potentially leading to crop failure.",
     accuracy: 0.88,
     latency: 1876,
-    tokenCount: 48,
-    ecr: 0.1234,
+    outputTokens: 48,
+    judge: "gemini-3.5-flash-lite",
+    reasoning:
+      "Correct causal direction and every downstream variable updated; slightly hedged on the size of the yield loss.",
     errorType: 0,
     hallucination: false,
   },

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import ReactFlow, {
   Node,
   Edge,
@@ -12,83 +12,96 @@ import "reactflow/dist/style.css";
 interface SCMGraphProps {
   nodes: Record<string, string>;
   edges: [string, string][];
+  intervened?: string[];
 }
 
-export const SCMGraph = ({ nodes, edges }: SCMGraphProps) => {
-  // Convert SCM nodes to ReactFlow nodes
+const COBALT = "#1D3A9E";
+const TEA = "#C8862A";
+
+// Longest-path depth from any root, so causes sit above their effects.
+const depthOf = (keys: string[], edges: [string, string][]) => {
+  const depth: Record<string, number> = Object.fromEntries(keys.map((k) => [k, 0]));
+  for (let i = 0; i < keys.length; i++) {
+    for (const [from, to] of edges) {
+      if (depth[from] !== undefined && depth[to] !== undefined) {
+        depth[to] = Math.max(depth[to], depth[from] + 1);
+      }
+    }
+  }
+  return depth;
+};
+
+export const SCMGraph = ({ nodes, edges, intervened = [] }: SCMGraphProps) => {
   const flowNodes: Node[] = useMemo(() => {
-    const nodeKeys = Object.keys(nodes);
-    const totalNodes = nodeKeys.length;
-    const radius = 150;
-    const centerX = 250;
-    const centerY = 200;
+    const keys = Object.keys(nodes);
+    const depth = depthOf(keys, edges);
+    const columns: Record<number, string[]> = {};
+    keys.forEach((k) => (columns[depth[k]] ??= []).push(k));
 
-    return nodeKeys.map((key, index) => {
-      // Position nodes in a circular layout
-      const angle = (2 * Math.PI * index) / totalNodes;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-
+    return keys.map((key) => {
+      const col = columns[depth[key]];
+      const row = col.indexOf(key);
+      const isV = intervened.includes(key);
       return {
         id: key,
-        type: "default",
-        position: { x, y },
+        position: {
+          x: (row - (col.length - 1) / 2) * 190 + (depth[key] % 2 ? 36 : -36),
+          y: depth[key] * 105,
+        },
         data: {
           label: (
             <div className="text-center">
-              <div className="font-bold text-purple-300">{key}</div>
-              <div className="text-xs text-slate-400 mt-1 max-w-[120px] break-words">
-                {nodes[key]}
+              <div className="text-xs font-bold" style={{ color: isV ? TEA : COBALT }}>
+                {key}
+              </div>
+              <div className="mt-0.5 text-[13px] font-semibold leading-tight text-ink">
+                {String(nodes[key]).replace(/_/g, " ")}
               </div>
             </div>
           ),
         },
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
         style: {
-          background: "rgba(139, 92, 246, 0.1)",
-          border: "2px solid rgb(168, 85, 247)",
-          borderRadius: "8px",
-          padding: "12px",
-          width: "auto",
-          minWidth: "140px",
-          zIndex: 10,
+          background: isV ? "#F4E6CF" : "#FFFFFF",
+          border: `1.5px solid ${isV ? TEA : COBALT}`,
+          borderRadius: 18,
+          padding: "10px 14px",
+          width: 170,
         },
       };
     });
-  }, [nodes]);
+  }, [nodes, edges, intervened]);
 
-  // Convert SCM edges to ReactFlow edges
-  const flowEdges: Edge[] = useMemo(() => {
-    return edges.map(([source, target], index) => ({
-      id: `${source}-${target}-${index}`,
-      source,
-      target,
-      type: "smoothstep",
-      animated: true,
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        color: "rgb(168, 85, 247)",
-      },
-      style: {
-        stroke: "rgb(168, 85, 247)",
-        strokeWidth: 2,
-      },
-      zIndex: 0,
-    }));
-  }, [edges]);
+  const flowEdges: Edge[] = useMemo(
+    () =>
+      edges.map(([source, target], index) => {
+        const color = intervened.includes(source) ? TEA : "#6F84C9";
+        return {
+          id: `${source}-${target}-${index}`,
+          source,
+          target,
+          type: "default",
+          animated: true,
+          markerEnd: { type: MarkerType.ArrowClosed, color },
+          style: { stroke: color, strokeWidth: 2 },
+        };
+      }),
+    [edges, intervened]
+  );
 
   return (
-    <div className="w-full h-[400px] bg-slate-950 rounded-lg border border-slate-700">
+    <div className="h-[420px] w-full overflow-hidden rounded-3xl border border-glaze bg-white" data-lenis-prevent>
       <ReactFlow
         nodes={flowNodes}
         edges={flowEdges}
         fitView
-        attributionPosition="bottom-left"
+        fitViewOptions={{ padding: 0.2, maxZoom: 1.1 }}
         proOptions={{ hideAttribution: true }}
+        nodesConnectable={false}
       >
-        <Background color="#475569" gap={16} />
-        <Controls className="bg-slate-800 border-slate-700" />
+        <Background color="#D5DCE6" gap={18} size={1.5} />
+        <Controls showInteractive={false} />
       </ReactFlow>
     </div>
   );

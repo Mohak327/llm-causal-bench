@@ -1,3 +1,5 @@
+import { keysHeader, type UserKeys } from '@/services/llm/keyVault';
+
 export interface SCMData {
   G: {
     nodes: Record<string, string>;
@@ -13,9 +15,17 @@ export interface SCMData {
 export interface AnalysisResult {
   errorType: number;
   accuracy: number;
-  ecr: number;
   hallucination: boolean;
   reasoning: string;
+  // Model that graded the answer; absent for the heuristic fallback.
+  judge?: string;
+}
+
+export interface ModelAnswer {
+  model: string;
+  text?: string;
+  success: boolean;
+  error?: string;
 }
 
 /**
@@ -31,32 +41,30 @@ export class AnalysisService {
   static async analyzeWithLLM(
     scm: SCMData,
     response: string,
-    evaluatorModel: string = 'claude'
+    gradedModel: string,
+    userKeys: UserKeys = {}
   ): Promise<AnalysisResult> {
     try {
-      // Build evaluation prompt
-      const evaluationPrompt = this.buildEvaluationPrompt(scm, response);
-      
-      // Call evaluator LLM (you can use LLMService here)
       const evalResponse = await fetch('/api/evaluate-response', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...keysHeader(userKeys) },
         body: JSON.stringify({
-          prompt: evaluationPrompt,
-          model: evaluatorModel
-        })
+          prompt: this.buildEvaluationPrompt(scm, response),
+          gradedModel,
+        }),
       });
 
       const evalData = await evalResponse.json();
-      
       if (!evalResponse.ok) {
-        throw new Error('Evaluation failed');
+        throw new Error(evalData.error || `Evaluation failed (${evalResponse.status})`);
       }
-
       return evalData.analysis;
     } catch (error) {
       console.error('Analysis error:', error);
-      return this.fallbackAnalysis(scm, response);
+      // Say so rather than silently passing off a heuristic as a judge's grade.
+      const fallback = this.fallbackAnalysis(scm, response);
+      const reason = error instanceof Error ? error.message : String(error);
+      return { ...fallback, reasoning: `Judge unavailable (${reason}); graded by word-overlap heuristic.` };
     }
   }
 
@@ -146,12 +154,9 @@ Return ONLY a JSON object:
       accuracy = similarityScore;
     }
     
-    const ecr = (1 - accuracy) * 0.5;
-    
     return {
       errorType,
       accuracy,
-      ecr,
       hallucination: false,
       reasoning: 'Fallback heuristic analysis'
     };
@@ -203,24 +208,24 @@ Return ONLY a JSON object:
    */
   static async analyzeBatch(
     scm: SCMData,
-    responses: Array<{ model: string; text: string; success: boolean }>,
-    useAI: boolean = false
+    responses: ModelAnswer[],
+    useAI: boolean = false,
+    userKeys: UserKeys = {}
   ): Promise<Array<any>> {
     return Promise.all(
       responses.map(async (resp) => {
-        if (!resp.success) {
+        if (!resp.success || !resp.text) {
           return {
             ...resp,
             accuracy: 0,
             errorType: -1,
-            ecr: 0,
             hallucination: false,
-            reasoning: 'API call failed'
+            reasoning: resp.error ?? 'API call failed'
           };
         }
 
-        const analysis = useAI 
-          ? await this.analyzeWithLLM(scm, resp.text)
+        const analysis = useAI
+          ? await this.analyzeWithLLM(scm, resp.text, resp.model, userKeys)
           : this.fallbackAnalysis(scm, resp.text);
 
         return {

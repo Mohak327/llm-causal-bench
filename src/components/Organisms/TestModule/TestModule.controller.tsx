@@ -1,26 +1,42 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnalysisService } from "@/services/analysis/AnalysisService";
+import { keysHeader, type UserKeys } from "@/services/llm/keyVault";
+import { DEFAULT_TEST_MODELS } from "@/services/llm/models";
 import { SAMPLE_SCM, DUMMY_RESPONSES } from "./TestModule.model";
 import { TestModuleView } from "./TestModule.view";
 
-export const TestModule = () => {
+export const TestModule = ({
+  available,
+  userKeys,
+}: {
+  // Models the site's or the user's keys can run; null while loading.
+  available: string[] | null;
+  userKeys: UserKeys;
+}) => {
   const [textInput, setTextInput] = useState("");
   const [queryInput, setQueryInput] = useState("");
-  const [selectedModels, setSelectedModels] = useState([
-    "claude",
-    "gpt4",
-    "gemini",
-  ]);
+  const [selectedModels, setSelectedModels] = useState(DEFAULT_TEST_MODELS);
+
+  // Drop selections that lost their key (e.g. after locking My keys).
+  useEffect(() => {
+    if (available) setSelectedModels((prev) => prev.filter((m) => available.includes(m)));
+  }, [available]);
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [error, setError] = useState("");
 
-  // Dummy data for testing UI
   const loadDummyData = () => {
+    setError("");
     setResults({
       scm: SAMPLE_SCM,
       responses: DUMMY_RESPONSES,
     });
+  };
+
+  const fillExample = () => {
+    setTextInput(SAMPLE_SCM.T);
+    setQueryInput(SAMPLE_SCM.Q);
   };
 
   const toggleModel = (modelId: string) => {
@@ -33,12 +49,14 @@ export const TestModule = () => {
 
   const runTest = async () => {
     setTesting(true);
+    setError("");
 
     try {
       const response = await fetch("/api/test-models", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...keysHeader(userKeys),
         },
         body: JSON.stringify({
           text: textInput,
@@ -57,15 +75,20 @@ export const TestModule = () => {
       const analyzedResponses = await AnalysisService.analyzeBatch(
         SAMPLE_SCM,
         data.responses,
-        true // Always use AI evaluation for benchmarking accuracy
+        true, // Always use AI evaluation for benchmarking accuracy
+        userKeys
       );
 
       setResults({
         scm: SAMPLE_SCM,
         responses: analyzedResponses,
       });
-    } catch (error) {
-      console.error("Error running tests:", error);
+    } catch (err: any) {
+      console.error("Error running tests:", err);
+      setError(
+        err?.message ||
+          "The test couldn't run. Check that the model API keys are configured."
+      );
     } finally {
       setTesting(false);
     }
@@ -78,11 +101,14 @@ export const TestModule = () => {
       queryInput={queryInput}
       setQueryInput={setQueryInput}
       selectedModels={selectedModels}
+      available={available}
       toggleModel={toggleModel}
       testing={testing}
       results={results}
+      error={error}
       runTest={runTest}
       loadDummyData={loadDummyData}
+      fillExample={fillExample}
     />
   );
 };

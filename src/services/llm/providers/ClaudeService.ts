@@ -1,54 +1,70 @@
-import { LLMMessage, LLMResponse } from "../LLMService";
+import Anthropic from "@anthropic-ai/sdk";
+import type { ModelConfig } from "../models";
+import {
+  LLMError,
+  parseRetryAfter,
+  type LLMCompletion,
+  type LLMProvider,
+  type LLMRequest,
+} from "../types";
 
-export class ClaudeService {
-  private apiKey: string;
+export class AnthropicProvider implements LLMProvider {
+  private readonly client: Anthropic;
 
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
+    // Retries are handled once, in LLMService, for every provider.
+    this.client = new Anthropic({ apiKey, maxRetries: 0 });
   }
 
-  async call(
-    messages: LLMMessage[],
-    maxTokens: number = 2000
-  ): Promise<LLMResponse> {
-    const startTime = Date.now();
+  async complete(
+    model: ModelConfig,
+    { messages, maxTokens }: LLMRequest,
+    signal: AbortSignal
+  ): Promise<LLMCompletion> {
+    const system = messages
+      .filter((m) => m.role === "system")
+      .map((m) => m.content)
+      .join("\n\n");
 
-    const systemMessage = messages.find((m) => m.role === "system");
-    const userMessages = messages.filter((m) => m.role !== "system");
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": this.apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: maxTokens,
-        system: systemMessage?.content,
-        messages: userMessages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `Claude API Error: ${response.status} - ${JSON.stringify(errorData)}`
+    try {
+      const response = await this.client.beta.messages.create(
+        {
+          model: model.modelId,
+          max_tokens: maxTokens,
+          ...(system && { system }),
+          messages: messages
+            .filter((m) => m.role !== "system")
+            .map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+          // If a safety classifier declines, the API retries on a fallback model.
+          betas: ["server-side-fallback-2026-07-01"],
+          fallbacks: "default",
+        },
+        { signal }
       );
+
+      if (response.stop_reason === "refusal") {
+        throw new LLMError("declined to answer");
+      }
+      const text = response.content
+        .flatMap((block) => (block.type === "text" ? [block.text] : []))
+        .join("");
+      if (!text.trim()) {
+        throw new LLMError(
+          response.stop_reason === "max_tokens"
+            ? "ran out of tokens before answering"
+            : "returned an empty answer"
+        );
+      }
+      return { text, outputTokens: response.usage.output_tokens };
+    } catch (error) {
+      if (error instanceof Anthropic.APIError) {
+        throw new LLMError(
+          error.message,
+          error.status,
+          parseRetryAfter(error.headers?.get("retry-after"))
+        );
+      }
+      throw error;
     }
-
-    const data = await response.json();
-    const latency = Date.now() - startTime;
-
-    return {
-      text: data.content[0].text,
-      tokenCount: data.usage?.output_tokens || 0,
-      latency,
-      model: "claude",
-    };
   }
 }

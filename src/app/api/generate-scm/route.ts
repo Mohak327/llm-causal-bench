@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMService } from '@/services/llm/LLMService';
+import { complete, httpStatusOf, parseJsonObject, parseUserKeys } from '@/services/llm/LLMService';
+import { DEFAULT_GENERATE_MODEL, KEYS_HEADER } from '@/services/llm/models';
 
-export async function POST(request: NextRequest) {
-  try {
-    const { prompt, model } = await request.json();
-
-    if (!prompt) {
-      return NextResponse.json(
-        { error: 'Prompt is required' },
-        { status: 400 }
-      );
-    }
-
-    const systemPrompt = `You are an expert in causal reasoning and structural causal models (SCMs). Generate a causal reasoning benchmark based on the user's prompt.
+const SYSTEM_PROMPT = `You are an expert in causal reasoning and structural causal models (SCMs). Generate a causal reasoning benchmark based on the user's prompt.
 
 Your response must be ONLY a valid JSON object with this exact structure:
 {
@@ -44,46 +34,55 @@ Guidelines:
 
 Return ONLY the JSON object, no markdown, no explanation.`;
 
-    // Use LLM Service to call the selected model
-    const response = await LLMService.call(
-      model || 'claude',
-      [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt }
-      ],
-      4000 // Increased token limit to handle complex SCMs with detailed narratives
+// Checks the shape the UI relies on; the model's JSON is otherwise untrusted.
+function isSCM(value: Record<string, any>): boolean {
+  const nodes = value.G?.nodes;
+  const edges = value.G?.edges;
+  return (
+    nodes && typeof nodes === 'object' &&
+    Array.isArray(edges) &&
+    edges.every((e: unknown) => Array.isArray(e) && e.length === 2 && e.every((k) => k in nodes)) &&
+    Array.isArray(value.V) && value.V.every((k: unknown) => typeof k === 'string' && k in nodes) &&
+    ['T', 'Q', 'S'].every((k) => typeof value[k] === 'string')
+  );
+}
+
+export async function POST(request: NextRequest) {
+  const { prompt, model = DEFAULT_GENERATE_MODEL } = await request.json();
+
+  if (!prompt) {
+    return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+  }
+
+  try {
+    const response = await complete(
+      model,
+      {
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: prompt },
+        ],
+        // Room for reasoning models' thinking plus a detailed narrative.
+        maxTokens: 8192,
+        json: true,
+      },
+      parseUserKeys(request.headers.get(KEYS_HEADER))
     );
 
-    const responseText = response.text;
-
-    // Parse the JSON response
-    let scmData;
-    try {
-      // Try to extract JSON from the response
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        scmData = JSON.parse(jsonMatch[0]);
-      } else {
-        scmData = JSON.parse(responseText);
-      }
-    } catch (parseError) {
+    const scmData = parseJsonObject(response.text);
+    if (!isSCM(scmData)) {
       return NextResponse.json(
-        { error: 'Failed to parse SCM data from model response', responseText },
-        { status: 500 }
+        { error: 'The model returned a scenario with a malformed graph', responseText: response.text },
+        { status: 502 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      scmData,
-      generatedBy: model || 'claude'
-    });
-
-  } catch (error: any) {
+    return NextResponse.json({ scmData, generatedBy: response.model });
+  } catch (error) {
     console.error('Generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate SCM' },
-      { status: 500 }
+      { error: error instanceof Error ? error.message : 'Failed to generate SCM' },
+      { status: httpStatusOf(error) }
     );
   }
 }
